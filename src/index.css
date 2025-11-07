@@ -2,15 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -20,4 +11,15 @@ code {
 .transform-style-preserve-3d { transform-style: preserve-3d; }
 .backface-hidden { backface-visibility: hidden; }
 .rotate-y-180 { transform: rotateY(-180deg); }
+
+body {
+  background-color: #fffaf8; /* soft beige background */
+  color: #6b2020; /* dark reddish-brown text */
+  font-family: 'Georgia', 'Times New Roman', serif;
+}
+
+h1, h2, h3 {
+  color: #a12222; /* MeTILDA-style heading red */
+}
+
 
