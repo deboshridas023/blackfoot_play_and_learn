@@ -21,9 +21,12 @@ export default function Flashcards() {
     async function loadCards() {
       try {
         setLoading(true);
-        const colRef = collection(db, `flashcards/dnvSyiAbhumktOGFUy3s/${theme}`);
+        const colRef = collection(
+          db,
+          `flashcards/dnvSyiAbhumktOGFUy3s/${theme}`
+        );
         const snap = await getDocs(colRef);
-        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 
         if (!cancelled) {
           setCards(data);
@@ -56,7 +59,10 @@ export default function Flashcards() {
           setImage(null);
           return;
         }
-        const imageRef = ref(storage, `blackfootimages/${cards[index].image}`);
+        const imageRef = ref(
+          storage,
+          `blackfootimages/${cards[index].image}`
+        );
         const url = await getDownloadURL(imageRef);
         setImage(url);
       } catch (err) {
@@ -131,7 +137,7 @@ export default function Flashcards() {
             Restart
           </button>
           <button
-            onClick={() => navigate('/games/flashcardthemes')}
+            onClick={() => navigate("/games/flashcardthemes")}
             className="px-5 py-2 border border-[#d4af37] text-[#6b2020] rounded hover:bg-[#d4af37]/20"
           >
             Back to Themes
@@ -152,16 +158,22 @@ export default function Flashcards() {
     >
       <Navbar />
 
-{/* Go to Home button — page-specific, not in Navbar */}
-<div className="flex justify-end px-6 mt-4">
-  <button
-    onClick={() => navigate("/")}
-    className="px-4 py-2 bg-[#c54b4b] text-[#fffaf8] rounded hover:bg-[#a63e3e] transition-all duration-200"
-  >
-    Exit Game & Return Home
-  </button>
-</div>
+      {/* ⭐ Unified Button Bar — SAME styling & same row */}
+      <div className="flex justify-between px-6 mt-4">
+        <button
+          onClick={() => navigate("/games/flashcardthemes")}
+          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
+        >
+          ← Back to Themes
+        </button>
 
+        <button
+          onClick={() => navigate("/")}
+          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
+        >
+          Exit Game & Return Home
+        </button>
+      </div>
 
       <div className="flex flex-1 items-center justify-center p-6">
         <div className="relative w-[320px] h-[460px] sm:w-[380px] sm:h-[500px] perspective">

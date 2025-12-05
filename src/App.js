@@ -5,6 +5,13 @@ import Login from "./pages/login";
 import Home from "./pages/home";
 import Flashcardthemes from "./games/flashcardthemes";
 import Flashcards from "./games/flashcards";
+import FillInTheGap from "./games/fillinthegap";
+import History from "./pages/history";
+import ShortStoriesList from "./games/shortstorieslist"
+import ShortStoryDetail from "./games/shortstoriesdetails"
+import Quiz from "./games/quiz"
+import Leaderboard from "./pages/leaderboard";
+
 
 function App() {
   const [user, setUser] = useState(undefined);
@@ -27,6 +34,12 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/games/flashcardthemes" element={<Flashcardthemes />} />
         <Route path="/games/flashcards/:theme" element={<Flashcards />} />
+        <Route path="/games/fillinthegap" element={<FillInTheGap />} />
+        <Route path="/games/shortstorieslist" element={<ShortStoriesList />} />
+        <Route path="/games/shortstoriesdetails/:id" element={<ShortStoryDetail />} />
+        <Route path="/games/quiz" element={<Quiz />} />
+        <Route path="/history" element={<History />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </BrowserRouter>
   );
