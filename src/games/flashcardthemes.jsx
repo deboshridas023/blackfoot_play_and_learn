@@ -6,8 +6,7 @@ const THEMES = [
   { slug: "animals", title: "Animals", tagline: "Creatures great & small" },
   { slug: "days", title: "Days of the Week", tagline: "The journey of the week" },
   { slug: "body-parts", title: "Body Parts", tagline: "Head to toe" },
-  { slug: "seasons", title: "Seasons", tagline: "Spring · Summer · Fall · Winter" },
-  { slug: "senses", title: "Senses", tagline: "See · Hear · Smell · Taste · Touch" },
+  { slug: "clothing", title: "Clothing", tagline: "Made to be worn" }
 ];
 
 function WatercolorIcon({ className }) {

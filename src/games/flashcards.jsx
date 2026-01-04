@@ -45,6 +45,22 @@ export default function Flashcards() {
     return () => (cancelled = true);
   }, [theme]);
 
+  // Prevent layout shift / horizontal scrollbars during 3D flip animation
+  useEffect(() => {
+    const prevBodyOverflowX = document.body.style.overflowX;
+    const prevBodyScrollbarGutter = document.body.style.scrollbarGutter;
+
+    // Prevent temporary horizontal overflow during the flip from triggering a scrollbar.
+    document.body.style.overflowX = "hidden";
+    // Keep layout width stable even if scrollbars appear/disappear.
+    document.body.style.scrollbarGutter = "stable";
+
+    return () => {
+      document.body.style.overflowX = prevBodyOverflowX;
+      document.body.style.scrollbarGutter = prevBodyScrollbarGutter;
+    };
+  }, []);
+
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -88,6 +104,11 @@ export default function Flashcards() {
     );
 
   const current = cards[index];
+  const totalCards = cards.length;
+  const coveredCards = Math.min(index + 1, totalCards);
+  const progressPercent = totalCards
+    ? Math.round((coveredCards / totalCards) * 100)
+    : 0;
 
   const handleFlip = () => setFlipped(!flipped);
   const handleNext = () => {
@@ -149,7 +170,7 @@ export default function Flashcards() {
 
   return (
     <div
-      className="min-h-screen flex flex-col text-[#6b2020]"
+      className="min-h-screen flex flex-col text-[#6b2020] overflow-x-hidden"
       style={{
         background:
           "linear-gradient(rgba(247, 230, 228, 0.95), rgba(240, 220, 216, 0.98)), url('https://www.transparenttextures.com/patterns/aged-paper.png')",
@@ -175,8 +196,34 @@ export default function Flashcards() {
         </button>
       </div>
 
+      {/* Progress (outside the flashcard) */}
+      <div className="px-6 mt-6">
+        <div className="mx-auto w-full max-w-[420px]">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-[#6b2020]">Progress</span>
+            <span className="text-[#6b2020]/80">
+              {coveredCards}/{totalCards}
+            </span>
+          </div>
+
+          <div
+            className="mt-2 h-2 w-full rounded-full bg-[#f0d7d7] overflow-hidden"
+            role="progressbar"
+            aria-label="Flashcards progress"
+            aria-valuenow={coveredCards}
+            aria-valuemin={0}
+            aria-valuemax={totalCards}
+          >
+            <div
+              className="h-full rounded-full bg-[#d4af37] transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-1 items-center justify-center p-6">
-        <div className="relative w-[320px] h-[460px] sm:w-[380px] sm:h-[500px] perspective">
+        <div className="relative w-[320px] h-[460px] sm:w-[380px] sm:h-[500px] perspective overflow-hidden">
           <div
             className={`relative w-full h-full duration-500 transform-style-preserve-3d ${
               flipped ? "rotate-y-180" : ""

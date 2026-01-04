@@ -50,7 +50,7 @@ export default function Home() {
 
         {/* Fill in the Gap */}
         <Link
-          to="/games/fillinthegap"
+          to="/games/fillinthegapthemes"
           className="bg-[#fff4f4] border border-[#b55656] rounded-lg p-6 
                      flex flex-col items-center justify-center h-72
                      hover:scale-105 hover:shadow-md hover:border-[#d4af37] hover:shadow-[#d4af37]/40

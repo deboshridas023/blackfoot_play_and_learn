@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithPopup,
+  sendEmailVerification,
 } from "firebase/auth";
 
 export default function Login() {
@@ -12,16 +13,22 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
   const handleEmailAuth = async () => {
     setError("");
+    setInfo("");
     if (isSignup) {
       if (password !== confirm) {
         setError("Passwords do not match");
         return;
       }
       try {
-        await createUserWithEmailAndPassword(auth, email, password);
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        // Send verification email and require verification before app access.
+        await sendEmailVerification(cred.user);
+        // Keep them signed in so the app can show the Verify Email gate immediately.
+        setInfo("Account created. Please check your email and verify your address to continue.");
       } catch (err) {
         setError(err.message);
       }
@@ -42,6 +49,12 @@ export default function Login() {
     }
   };
 
+  const toggleMode = () => {
+    setError("");
+    setInfo("");
+    setIsSignup(!isSignup);
+  };
+
   return (
     <div
       className="min-h-screen w-full flex flex-col md:flex-row 
@@ -56,6 +69,7 @@ export default function Login() {
           </h1>
 
           {error && <p className="text-[#c54b4b] text-sm mb-3 text-center">{error}</p>}
+          {info && <p className="text-[#6b2020] text-sm mb-3 text-center">{info}</p>}
 
           <input
             type="email"
@@ -106,7 +120,7 @@ export default function Login() {
           <p className="text-sm text-center mt-4 text-[#6b2020]">
             {isSignup ? "Already have an account?" : "Don't have an account?"}{" "}
             <span
-              onClick={() => setIsSignup(!isSignup)}
+              onClick={toggleMode}
               className="text-[#c54b4b] font-medium underline cursor-pointer hover:text-[#a33e3e]"
             >
               {isSignup ? "Login" : "Sign up"}

@@ -1,9 +1,23 @@
 import { signOut } from "firebase/auth";
-import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 
 export default function Navbar() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(auth.currentUser);
+
+  useEffect(() => {
+    const unsub = auth.onAuthStateChanged((u) => setUser(u));
+    return () => unsub();
+  }, []);
+
+  const accountEmail = useMemo(() => {
+    // Prefer a real email, but fall back to a friendly label for providers/accounts
+    // that may not have one.
+    if (!user) return "";
+    return user.email || user.providerData?.find((p) => p.email)?.email || "Signed in";
+  }, [user]);
 
   const handleExit = async () => {
     await signOut(auth);
@@ -21,14 +35,28 @@ export default function Navbar() {
           </span>
         </h1>
 
-        {/* Logout */}
-        <button
-          onClick={handleExit}
-          className="px-4 py-1 border border-[#ffd28c] text-[#ffd28c] rounded 
-                     hover:bg-[#ffd28c]/20 transition-all duration-200"
-        >
-          Logout
-        </button>
+        {/* Account + Logout */}
+        <div className="flex items-center gap-4">
+          <div className="text-right leading-tight max-w-[320px]">
+            <div className="text-[11px] uppercase tracking-wider text-[#fffaf8]/80">
+              Account
+            </div>
+            <div
+              className="text-sm font-medium truncate"
+              title={accountEmail}
+            >
+              {accountEmail}
+            </div>
+          </div>
+
+          <button
+            onClick={handleExit}
+            className="px-4 py-1 border border-[#ffd28c] text-[#ffd28c] rounded 
+                       hover:bg-[#ffd28c]/20 transition-all duration-200"
+          >
+            Logout
+          </button>
+        </div>
 
       </div>
     </nav>
