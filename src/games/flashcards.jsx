@@ -246,7 +246,7 @@ export default function Flashcards() {
         </header>
 
         {/* Progress */}
-        <div className="mt-6 max-w-xl">
+        <div className="mt-6 w-full">
           <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-1">
             <span>Progress</span>
             <span>
@@ -338,4 +338,3 @@ export default function Flashcards() {
     </Page>
   );
 }
-

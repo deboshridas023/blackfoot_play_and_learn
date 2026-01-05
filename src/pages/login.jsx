@@ -5,6 +5,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithPopup,
   sendEmailVerification,
+  sendPasswordResetEmail,
 } from "firebase/auth";
 import Page from "../components/ui/Page";
 import Card from "../components/ui/Card";
@@ -18,13 +19,16 @@ export default function Login() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const handleEmailAuth = async () => {
     setError("");
     setInfo("");
+    setBusy(true);
     if (isSignup) {
       if (password !== confirm) {
         setError("Passwords do not match");
+        setBusy(false);
         return;
       }
       try {
@@ -43,13 +47,37 @@ export default function Login() {
         setError(err.message);
       }
     }
+    setBusy(false);
+  };
+
+  const handleForgotPassword = async () => {
+    setError("");
+    setInfo("");
+
+    if (!email?.trim()) {
+      setError("Enter your email above to receive a password reset link.");
+      return;
+    }
+
+    setBusy(true);
+    try {
+      await sendPasswordResetEmail(auth, email.trim());
+      setInfo("Password reset email sent. Check your inbox (and spam folder). ");
+    } catch (err) {
+      setError(err?.message || "Failed to send password reset email.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const handleGoogle = async () => {
     try {
+      setBusy(true);
       await signInWithPopup(auth, googleProvider);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -120,6 +148,19 @@ export default function Login() {
                 />
               </div>
 
+              {!isSignup && (
+                <div className="-mt-1 flex items-center justify-end">
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={busy}
+                    className="text-xs font-medium text-[var(--brand)] hover:underline disabled:opacity-60"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              )}
+
               {isSignup && (
                 <div>
                   <label className="block text-xs font-medium text-[var(--muted)]">
@@ -141,6 +182,7 @@ export default function Login() {
                 type="submit"
                 leftIcon={isSignup ? UserPlus : LogIn}
                 className="w-full"
+                disabled={busy}
               >
                 {isSignup ? "Create account" : "Sign in"}
               </Button>
@@ -150,6 +192,7 @@ export default function Login() {
                 onClick={handleGoogle}
                 variant="secondary"
                 className="w-full"
+                disabled={busy}
               >
                 <img
                   src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
