@@ -1,6 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Navbar from "../components/navbar";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import TopActions, { ExitButton } from "../components/ui/TopActions";
+import Button from "../components/ui/Button";
 import { db, auth } from "../firebase";
 import {
   collection,
@@ -11,6 +15,7 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
+import { Home, CheckCircle2, ChevronLeft, ChevronRight, RotateCcw, Trophy } from "lucide-react";
 
 const QUIZ_SIZE = 10;
 
@@ -77,6 +82,7 @@ function mapFirestoreQuizDoc(docSnap) {
 }
 
 export default function Quiz() {
+  const navigate = useNavigate();
   const [questionBank, setQuestionBank] = useState([]); // all questions from Firestore
   const [questions, setQuestions] = useState([]); // 10 random questions per attempt
   const total = questions.length;
@@ -228,32 +234,35 @@ export default function Quiz() {
   const progressPct = total ? Math.round(((step + 1) / total) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fffaf8] via-[#fff7ef] to-[#ffeeda] text-[#381010]">
+    <Page variant="paper">
       <Navbar />
 
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        {/* Header */}
-        <header className="mb-6 sm:mb-8">
-          <h1 className="font-serif text-3xl sm:text-4xl text-[#6b2020] tracking-tight">
-            Quick Quiz
+      <div className="pt-8">
+        <header>
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            Practice
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+            Quick quiz
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-[#6b2020]/80">
-            Test your knowledge with {total || QUIZ_SIZE} questions about
-            Blackfoot language and culture.
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Test your knowledge with {total || QUIZ_SIZE} questions about Blackfoot
+            language and culture.
           </p>
 
-          {/* Progress */}
+          <TopActions right={<ExitButton onClick={() => navigate("/")} icon={Home} />} />
+
           {!submitted && total > 0 && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between text-xs text-[#6b2020]/80 mb-1">
+            <div className="mt-6 max-w-2xl">
+              <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-1">
                 <span>
                   {step + 1}/{total}
                 </span>
                 <span>{progressPct}%</span>
               </div>
-              <div className="h-2 w-full rounded-full bg-[#d4af37]/20 overflow-hidden">
+              <div className="h-2 w-full rounded-full bg-amber-50/70 overflow-hidden border border-[var(--border)]">
                 <div
-                  className="h-full bg-[#d4af37] transition-all"
+                  className="h-full bg-[var(--gold)] transition-all"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
@@ -262,7 +271,7 @@ export default function Quiz() {
         </header>
 
         {/* Card */}
-        <section className="relative overflow-hidden rounded-2xl border border-[#d4af37]/50 bg-white/80 shadow-sm backdrop-blur">
+        <Card className="mt-8 border border-rose-200/70">
           {loading ? (
             <div className="p-6 sm:p-8">
               <div className="inline-flex items-center gap-3 rounded-xl border border-[#d4af37]/60 bg-white/70 px-4 py-3">
@@ -338,58 +347,41 @@ export default function Quiz() {
                   {/* Nav buttons */}
                   <div className="mt-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                     <div className="flex gap-3">
-                      <button
+                      <Button
                         type="button"
                         onClick={prevStep}
                         disabled={step === 0}
-                        className={[
-                          "inline-flex items-center justify-center rounded-lg border px-4 py-2 text-sm",
-                          step === 0
-                            ? "border-[#6b2020]/20 text-[#6b2020]/40 cursor-not-allowed"
-                            : "border-[#d4af37] text-[#6b2020] hover:bg-[#fff5d6]",
-                        ].join(" ")}
+                        variant="secondary"
+                        leftIcon={ChevronLeft}
                       >
-                        ← Previous
-                      </button>
+                        Previous
+                      </Button>
 
                       {step < total - 1 ? (
-                        <button
+                        <Button
                           type="button"
                           onClick={nextStep}
                           disabled={answers[step] === null}
-                          className={[
-                            "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm text-white",
-                            answers[step] === null
-                              ? "bg-[#a12222]/50 cursor-not-allowed"
-                              : "bg-[#a12222] hover:bg-[#8c1d1d]",
-                          ].join(" ")}
+                          rightIcon={ChevronRight}
                         >
-                          Next →
-                        </button>
+                          Next
+                        </Button>
                       ) : (
-                        <button
+                        <Button
                           type="button"
                           onClick={submit}
                           disabled={submitting || answers.some((a) => a === null)}
-                          className={[
-                            "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm text-white",
-                            submitting || answers.some((a) => a === null)
-                              ? "bg-[#a12222]/50 cursor-not-allowed"
-                              : "bg-[#a12222] hover:bg-[#8c1d1d]",
-                          ].join(" ")}
+                          leftIcon={CheckCircle2}
                         >
-                          {submitting ? "Submitting…" : "Submit ✓"}
-                        </button>
+                          {submitting ? "Submitting…" : "Submit"}
+                        </Button>
                       )}
                     </div>
 
                     <div className="flex gap-3">
-                      <Link
-                        to="/"
-                        className="inline-flex items-center justify-center rounded-lg border border-[#d4af37] bg-white/80 px-4 py-2 text-sm text-[#6b2020] hover:bg-[#fff5d6]"
-                      >
+                      <Button as={Link} to="/" variant="secondary" leftIcon={Home}>
                         Home
-                      </Link>
+                      </Button>
                     </div>
                   </div>
                 </>
@@ -400,7 +392,7 @@ export default function Quiz() {
             <div className="p-6 sm:p-8">
               <div className="flex items-center gap-3">
                 <div className="grid h-12 w-12 place-items-center rounded-full bg-gradient-to-br from-amber-50 to-rose-50 ring-1 ring-amber-300/50">
-                  <span className="text-2xl">🏆</span>
+                  <Trophy className="h-6 w-6 text-amber-700" aria-hidden="true" />
                 </div>
                 <div>
                   <h2 className="text-xl sm:text-2xl font-semibold text-[#a12222]">
@@ -465,24 +457,17 @@ export default function Quiz() {
               </ol>
 
               <div className="mt-6 flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={reset}
-                  className="inline-flex items-center justify-center rounded-lg bg-[#a12222] px-4 py-2 text-sm text-white hover:bg-[#8c1d1d]"
-                >
+                <Button type="button" onClick={reset} leftIcon={RotateCcw}>
                   Retake quiz
-                </button>
-                <Link
-                  to="/"
-                  className="inline-flex items-center justify-center rounded-lg border border-[#d4af37] bg-white/80 px-4 py-2 text-sm text-[#6b2020] hover:bg-[#fff5d6]"
-                >
+                </Button>
+                <Button as={Link} to="/" variant="secondary" leftIcon={Home}>
                   Back to Home
-                </Link>
+                </Button>
               </div>
             </div>
           )}
-        </section>
-      </main>
-    </div>
+        </Card>
+      </div>
+    </Page>
   );
 }

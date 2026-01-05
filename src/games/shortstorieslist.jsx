@@ -5,6 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import Navbar from "../components/navbar";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import TopActions, { ExitButton } from "../components/ui/TopActions";
+import Button from "../components/ui/Button";
+import { BookOpenText, Home, ArrowRight } from "lucide-react";
 
 export default function ShortStoriesList() {
   const navigate = useNavigate();
@@ -37,82 +42,107 @@ export default function ShortStoriesList() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f1ec] text-[#6b2020]">
-        <p>Loading stories...</p>
-      </div>
+      <Page className="flex items-center" containerClassName="py-16" variant="paper">
+        <div className="w-full max-w-xl mx-auto text-center text-[var(--muted)]">
+          Loading stories…
+        </div>
+      </Page>
     );
   }
 
   if (!stories.length) {
     return (
-      <div className="min-h-screen bg-[#f8f1ec] text-[#6b2020]">
+      <Page containerClassName="py-10" variant="paper">
         <Navbar />
-        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-          <h1 className="text-2xl font-serif mb-4">Short Stories & Tales</h1>
-          <p>No stories found in the database.</p>
-          <button
-            onClick={() => navigate("/")}
-            className="mt-6 px-4 py-2 bg-[#c54b4b] text-[#fffaf8] rounded hover:bg-[#a63e3e] transition-all duration-200"
-          >
-            Return Home
-          </button>
-        </div>
-      </div>
+
+        <header className="pt-10 pb-4">
+          <div className="max-w-4xl">
+            <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+              Voices of the Blackfoot
+            </div>
+            <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+              Stories
+            </h1>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              No stories found in the database.
+            </p>
+          </div>
+
+          <TopActions right={<ExitButton onClick={() => navigate("/")} icon={Home} />} />
+        </header>
+
+        <Card className="p-6 text-center">
+          <Button onClick={() => navigate("/")} leftIcon={Home}>
+            Return home
+          </Button>
+        </Card>
+      </Page>
     );
   }
 
   return (
-    <div
-      className="min-h-screen bg-[#f8f1ec] text-[#6b2020]"
-      style={{
-        background:
-          "linear-gradient(rgba(247, 230, 228, 0.95), rgba(240, 220, 216, 0.98)), url('https://www.transparenttextures.com/patterns/aged-paper.png')",
-        backgroundRepeat: "repeat",
-      }}
-    >
+    <Page variant="paper">
       <Navbar />
 
-      <div className="flex justify-end px-6 mt-4">
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-[#c54b4b] text-[#fffaf8] rounded hover:bg-[#a63e3e] transition-all duration-200"
-        >
-          Exit & Return Home
-        </button>
-      </div>
+      <header className="pt-10 pb-4">
+        <div className="max-w-4xl">
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            Voices of the Blackfoot
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+            Stories
+          </h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Listen, read the translation, and guess the dialect.
+          </p>
+        </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <h1 className="text-3xl font-serif text-[#a12222] mb-6">
-          Short Stories & Tales
-        </h1>
+        <TopActions right={<ExitButton onClick={() => navigate("/")} icon={Home} />} />
+      </header>
 
-        <div className="grid gap-5 md:grid-cols-2">
+      <section className="pb-10">
+        <div className="grid gap-4 md:grid-cols-2">
           {stories.map((story) => (
-            <button
+            <Card
               key={story.id}
+              as="button"
+              type="button"
               onClick={() => navigate(`/games/shortstoriesdetails/${story.id}`)}
-              className="text-left bg-[#fff4f4] border border-[#e3a4a4] rounded-xl p-5 shadow-sm
-                         hover:shadow-md hover:border-[#d4af37] hover:shadow-[#d4af37]/40
-                         transition-all duration-200 cursor-pointer"
+              className="group text-left p-5 border border-rose-200/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-900/5 transition"
             >
-              {/* English title */}
-              <h2 className="text-xl font-semibold text-[#a12222] font-serif">
-                {story.englishtitle}
-              </h2>
+              <div className="flex items-start gap-4">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-rose-50 to-white ring-1 ring-rose-300/40">
+                  <BookOpenText className="h-6 w-6 text-[var(--brand)]" aria-hidden="true" />
+                </div>
 
-              {/* Blackfoot title */}
-              <p className="mt-1 text-sm text-[#6b2020]/80 italic">
-                {story.blackfoottitle}
-              </p>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-base sm:text-lg font-semibold text-[var(--text)]">
+                        {story.englishtitle}
+                      </h2>
+                      <p className="mt-1 text-sm text-[var(--muted)]">
+                        {story.blackfoottitle}
+                      </p>
+                    </div>
 
-              {/* Description */}
-              <p className="mt-3 text-sm leading-relaxed text-[#5a1b1b] line-clamp-3">
-                {story.description}
-              </p>
-            </button>
+                    <ArrowRight
+                      className="h-5 w-5 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition"
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  {story.description && (
+                    <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed line-clamp-3">
+                      {story.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
-      </div>
-    </div>
+      </section>
+    </Page>
   );
 }

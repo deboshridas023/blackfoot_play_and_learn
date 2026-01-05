@@ -12,6 +12,11 @@ import {
 } from "firebase/firestore";
 import { ref, getDownloadURL } from "firebase/storage";
 import Navbar from "../components/navbar";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import TopActions, { BackButton, ExitButton } from "../components/ui/TopActions";
+import Button from "../components/ui/Button";
+import { ChevronLeft, Home, Volume2, CheckCircle2, XCircle } from "lucide-react";
 
 export default function ShortStoryDetail() {
   const { id } = useParams();
@@ -30,6 +35,7 @@ export default function ShortStoryDetail() {
   // 1) Load story data
   useEffect(() => {
     let cancelled = false;
+    const audioEl = audioRef.current;
 
     async function loadStory() {
       try {
@@ -63,7 +69,6 @@ export default function ShortStoryDetail() {
       cancelled = true;
 
       // cleanup audio element safely
-      const audioEl = audioRef.current;
       if (audioEl) {
         audioEl.pause();
         audioEl.src = "";
@@ -147,148 +152,154 @@ export default function ShortStoryDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f1ec] text-[#6b2020]">
-        <p>Loading story...</p>
-      </div>
+      <Page className="flex items-center" containerClassName="py-16" variant="paper">
+        <div className="w-full max-w-xl mx-auto text-center text-[var(--muted)]">
+          Loading story…
+        </div>
+      </Page>
     );
   }
 
   if (!story) {
     return (
-      <div className="min-h-screen bg-[#f8f1ec] text-[#6b2020]">
+      <Page containerClassName="py-10" variant="paper">
         <Navbar />
-        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-          <h1 className="text-2xl font-serif mb-4">Story not found</h1>
-          <button
-            onClick={() => navigate("/games/shortstorieslist")}
-            className="mt-6 px-4 py-2 bg-[#c54b4b] text-[#fffaf8] rounded hover:bg-[#a63e3e] transition-all duration-200"
-          >
-            Back to Stories
-          </button>
+        <div className="pt-10">
+          <Card className="p-6 text-center">
+            <h1 className="text-xl sm:text-2xl font-semibold text-[var(--text)]">
+              Story not found
+            </h1>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              This story may have been removed or is unavailable.
+            </p>
+            <div className="mt-6 flex justify-center">
+              <Button
+                onClick={() => navigate("/games/shortstorieslist")}
+                variant="secondary"
+                leftIcon={ChevronLeft}
+              >
+                Back to Stories
+              </Button>
+            </div>
+          </Card>
         </div>
-      </div>
+      </Page>
     );
   }
 
   return (
-    <div
-      className="min-h-screen bg-[#f8f1ec] text-[#6b2020]"
-      style={{
-        background:
-          "linear-gradient(rgba(247, 230, 228, 0.95), rgba(240, 220, 216, 0.98)), url('https://www.transparenttextures.com/patterns/aged-paper.png')",
-        backgroundRepeat: "repeat",
-      }}
-    >
+    <Page variant="paper">
       <Navbar />
 
-      {/* ⭐ Unified button bar - same as Flashcards */}
-      <div className="flex justify-between px-6 mt-4">
-        <button
-          onClick={() => navigate("/games/shortstorieslist")}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          ← Back to Stories
-        </button>
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          Exit & Return Home
-        </button>
-      </div>
+      <div className="pt-8">
+        <header>
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            Voices of the Blackfoot
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+            {story.englishtitle}
+          </h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">{story.blackfoottitle}</p>
 
-      <div className="max-w-3xl mx-auto px-6 py-10">
-        {/* English title */}
-        <h1 className="text-3xl font-serif text-[#a12222] mb-2">
-          {story.englishtitle}
-        </h1>
+          <TopActions
+            left={
+              <BackButton
+                onClick={() => navigate("/games/shortstorieslist")}
+                icon={ChevronLeft}
+              >
+                Back to Stories
+              </BackButton>
+            }
+            right={<ExitButton onClick={() => navigate("/")} icon={Home} />}
+          />
+        </header>
 
-        {/* Blackfoot title */}
-        <h2 className="text-xl text-[#6b2020]/90 italic mb-4">
-          {story.blackfoottitle}
-        </h2>
+        <div className="mt-8 pb-12 grid gap-6">
+          {/* Audio + translation */}
+          <Card className="p-6 border border-rose-200/70">
+            <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+              Audio
+            </div>
+            <div className="mt-3">
+              <audio ref={audioRef} controls className="w-full max-w-md">
+                Your browser does not support the audio element.
+              </audio>
+            </div>
 
-        {/* Description (optional) */}
-        {story.description && (
-          <p className="mb-6 text-sm text-[#5a1b1b] leading-relaxed">
-            {story.description}
-          </p>
-        )}
-
-        {/* Audio + translation card */}
-        <div className="bg-[#fff4f4] border border-[#e3a4a4] rounded-xl p-6 shadow-sm">
-          <div className="flex flex-col gap-4">
-            {/* Native audio control ONLY */}
-            <audio ref={audioRef} controls className="w-full max-w-md">
-              Your browser does not support the audio element.
-            </audio>
-
-            {/* English translation */}
-            <div className="mt-4">
-              <h3 className="font-semibold text-[#a12222] mb-1">
-                English Translation
-              </h3>
-              <p className="text-sm leading-relaxed text-[#5a1b1b] whitespace-pre-line">
+            <div className="mt-6">
+              <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+                English translation
+              </div>
+              <p className="mt-2 text-sm text-[var(--text)] whitespace-pre-line leading-relaxed">
                 {story.englishtranslation}
               </p>
             </div>
-          </div>
+          </Card>
+
+          {/* Dialect guessing game */}
+          {story.dialectOptions && story.dialectOptions.length > 0 && (
+            <Card className="p-6 border border-rose-200/70">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+                    Game
+                  </div>
+                  <h2 className="mt-1 text-lg font-semibold text-[var(--text)]">
+                    Guess the dialect
+                  </h2>
+                </div>
+
+                <div className="text-xs text-[var(--muted)]">
+                  Score (this story): <span className="font-semibold text-[var(--text)]">{score}</span>
+                </div>
+              </div>
+
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {story.dialectOptions.map((option) => {
+                  const isSelected = selectedDialect === option;
+                  const correctSelected = isSelected && isCorrect === true;
+                  const wrongSelected = isSelected && isCorrect === false;
+
+                  return (
+                    <Button
+                      key={option}
+                      onClick={() => handleDialectClick(option)}
+                      variant={correctSelected ? "primary" : "secondary"}
+                      className={
+                        "justify-start w-full " +
+                        (wrongSelected
+                          ? "border-rose-400 bg-rose-50/70"
+                          : correctSelected
+                            ? "bg-emerald-700 hover:bg-emerald-800"
+                            : "")
+                      }
+                      leftIcon={
+                        correctSelected
+                          ? CheckCircle2
+                          : wrongSelected
+                            ? XCircle
+                            : Volume2
+                      }
+                    >
+                      {option}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              {isCorrect !== null && (
+                <div className="mt-4 text-sm">
+                  {isCorrect ? (
+                    <div className="text-emerald-700">Correct — +1 point.</div>
+                  ) : (
+                    <div className="text-rose-700">Not quite. Try again.</div>
+                  )}
+                </div>
+              )}
+            </Card>
+          )}
         </div>
-
-        {/* Dialect guessing game */}
-        {story.dialectOptions && story.dialectOptions.length > 0 && (
-          <div className="mt-8 bg-[#fff4f4] border border-[#e3a4a4] rounded-xl p-6 shadow-sm">
-            <h3 className="font-semibold text-[#a12222] mb-3">
-              Guess the dialect of this story
-            </h3>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              {story.dialectOptions.map((option) => {
-                const isSelected = selectedDialect === option;
-
-                let extraClasses = "";
-                if (isSelected && isCorrect === true) {
-                  extraClasses = "border-green-600 bg-green-50";
-                } else if (isSelected && isCorrect === false) {
-                  extraClasses = "border-red-600 bg-red-50";
-                }
-
-                return (
-                  <button
-                    key={option}
-                    onClick={() => handleDialectClick(option)}
-                    className={`w-full px-4 py-2 text-left border rounded-lg text-sm
-                                hover:border-[#d4af37] hover:bg-[#fff7e0] transition
-                                ${extraClasses}`}
-                  >
-                    {option}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Feedback */}
-            {isCorrect !== null && (
-              <p className="mt-3 text-sm">
-                {isCorrect ? (
-                  <span className="text-green-700">
-                    ✅ Correct! You earned 1 point.
-                  </span>
-                ) : (
-                  <span className="text-red-700">
-                    ❌ Not quite. Try again!
-                  </span>
-                )}
-              </p>
-            )}
-
-            {/* Optional: session score display */}
-            <p className="mt-2 text-xs text-[#6b2020]/70">
-              Score (this story): {score}
-            </p>
-          </div>
-        )}
       </div>
-    </div>
+    </Page>
   );
 }

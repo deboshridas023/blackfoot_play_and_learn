@@ -1,128 +1,184 @@
 import Navbar from "../components/navbar";
 import { Link } from "react-router-dom";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import {
+  BookOpen,
+  GraduationCap,
+  ListChecks,
+  Trophy,
+  Feather,
+  Languages,
+  ArrowRight,
+} from "lucide-react";
+
+const CARDS = [
+  {
+    to: "/history",
+    title: "Blackfoot History",
+    description:
+      "Learn about the stories, culture, and traditions of the Blackfoot people.",
+    meta: "Cultural Section",
+    icon: BookOpen,
+    tone: "gold",
+  },
+  {
+    to: "/games/flashcardthemes",
+    title: "Flashcards",
+    description: "Learn a little every day, the Blackfoot way.",
+    meta: "Language Game",
+    icon: GraduationCap,
+    tone: "rose",
+  },
+  {
+    to: "/games/fillinthegapthemes",
+    title: "Blackfoot Builder",
+    description: "Piece together meaning, one word at a time.",
+    meta: "Language Game",
+    icon: Languages,
+    tone: "rose",
+  },
+  {
+    to: "/leaderboard",
+    title: "Leaderboard",
+    description: "See top scores across games.",
+    meta: "Progress",
+    icon: Trophy,
+    tone: "gold",
+  },
+  {
+    to: "/games/shortstorieslist",
+    title: "Voices of the Blackfoot",
+    description:
+      "Listen to stories and guess the dialect like a language detective.",
+    meta: "Listening",
+    icon: Feather,
+    tone: "rose",
+  },
+  {
+    to: "/games/quiz",
+    title: "Quiz",
+    description: "Quick questions and answers.",
+    meta: "Practice",
+    icon: ListChecks,
+    tone: "rose",
+  },
+];
+
+function cardTone(tone) {
+  if (tone === "gold") {
+    return {
+      border: "border-[var(--border)]",
+      badge: "bg-amber-50/70 text-[var(--text)] border-[var(--border)]",
+      iconWrap:
+        "bg-gradient-to-br from-amber-50 to-white ring-1 ring-amber-300/40",
+      icon: "text-amber-700",
+    };
+  }
+  return {
+    border: "border-rose-200/70",
+    badge: "bg-rose-50/70 text-[var(--text)] border-rose-200/70",
+    iconWrap:
+      "bg-gradient-to-br from-rose-50 to-white ring-1 ring-rose-300/40",
+    icon: "text-[var(--brand)]",
+  };
+}
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#fffaf8] text-[#6b2020]">
+    <Page>
       <Navbar />
 
-      {/* 3 columns × 2 rows grid, all cards same height */}
-      <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
-
-        {/* History */}
-        <Link
-          to="/history"
-          className="bg-[#fff7e0] border border-[#d4af37] rounded-lg p-6 
-                     flex flex-col justify-start h-72
-                     hover:shadow-md hover:shadow-[#d4af37]/40 hover:-translate-y-1
-                     transition-all duration-300 cursor-pointer"
-        >
-          <span className="text-6xl mb-4">📜</span>
-
-          <p className="text-[#a12222] font-serif text-2xl font-semibold text-left">
-            Blackfoot History
+      <header className="pt-10 pb-6">
+        <div className="max-w-4xl">
+          <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[var(--text)]">
+            Learn Blackfoot through stories, practice, and games
+          </h1>
+          <p className="mt-2 text-sm sm:text-base text-[var(--muted)]">
+            Explore language learning activities and cultural context — designed
+            for focused, daily progress.
           </p>
-
-          <p className="text-[#6b2020]/80 text-sm italic mt-2 text-left leading-relaxed">
-            Learn about the stories, culture, and traditions of the Blackfoot people.
-            Explore timelines, places, and important events beyond language games.
-          </p>
-
-          <p className="mt-3 text-xs uppercase tracking-wide text-[#6b2020]/70">
-            Cultural Section
-          </p>
-        </Link>
-
-        {/* Flashcards */}
-        <Link
-          to="/games/flashcardthemes"
-          className="bg-[#fff4f4] border border-[#b55656] rounded-lg p-6 
-                     flex flex-col items-center justify-center h-72
-                     hover:scale-105 hover:shadow-md hover:border-[#d4af37] hover:shadow-[#d4af37]/40
-                     transition-transform duration-300 cursor-pointer"
-        >
-          <span className="text-5xl mb-3">🜁</span>
-          <p className="text-[#a12222] font-serif text-lg font-semibold">Flashcards</p>
-          <p className="text-[#6b2020]/80 text-sm italic mt-1 text-center">
-          Learn a little every day, the Blackfoot way.
-          </p>
-        </Link>
-
-        {/* Fill in the Gap */}
-        <Link
-          to="/games/fillinthegapthemes"
-          className="bg-[#fff4f4] border border-[#b55656] rounded-lg p-6 
-                     flex flex-col items-center justify-center h-72
-                     hover:scale-105 hover:shadow-md hover:border-[#d4af37] hover:shadow-[#d4af37]/40
-                     transition-transform duration-300 cursor-pointer"
-        >
-          <span className="text-5xl mb-3">📝</span>
-          <p className="text-[#a12222] font-serif text-lg font-semibold">Blackfoot Builder</p>
-          <p className="text-[#6b2020]/80 text-sm italic mt-1 text-center">
-          Piece together meaning, one word at a time.
-          </p>
-        </Link>
-
-        {/* Leaderboard */}
-        <Link
-          to="/leaderboard"
-          className="bg-[#fff7e0] border border-[#d4af37] rounded-lg p-6 
-                     flex flex-col items-center justify-center h-72
-                     hover:scale-105 hover:shadow-md hover:border-[#d4af37] hover:shadow-[#d4af37]/40
-                     transition-transform duration-300 cursor-pointer"
-        >
-          <span className="text-5xl mb-3">🏆</span>
-          <p className="text-[#a12222] font-serif text-lg font-semibold">Leaderboard</p>
-          <p className="text-[#6b2020]/80 text-sm italic mt-1 text-center">
-            See top scores across games.
-          </p>
-        </Link>
-
-        {/* Voices of the Blackfoot */}
-        <Link
-          to="/games/shortstorieslist"
-          className="bg-[#fff4f4] border border-[#b55656] rounded-lg p-6 
-                     flex flex-col items-center justify-center h-72
-                     hover:scale-105 hover:shadow-md hover:border-[#d4af37] hover:shadow-[#d4af37]/40
-                     transition-transform duration-300 cursor-pointer"
-        >
-          <span className="text-5xl mb-3">🪶</span>
-          <p className="text-[#a12222] font-serif text-lg font-semibold">
-            Voices of the Blackfoot
-          </p>
-          <p className="text-[#6b2020]/80 text-sm italic mt-1 text-center">
-            Listen to stories and guess the dialect like a language detective.
-          </p>
-        </Link>
-
-        {/* Quiz */}
-        <Link
-          to="/games/quiz"
-          className="bg-[#fff4f4] border border-[#b55656] rounded-lg p-6 
-                     flex flex-col items-center justify-center h-72
-                     hover:scale-105 hover:shadow-md hover:border-[#d4af37] hover:shadow-[#d4af37]/40
-                     transition-transform duration-300 cursor-pointer"
-        >
-          <span className="text-5xl mb-3">🎮</span>
-          <p className="text-[#a12222] font-serif text-lg font-semibold">Quiz</p>
-          <p className="text-[#6b2020]/80 text-sm italic mt-1 text-center">
-            Questions and Answers.
-          </p>
-        </Link>
-
-      </div>
-
-      {/* Acknowledgements bar */}
-      <div className="w-full bg-[#fffaf0] border-t border-[#d4af37]/70 py-4 px-6">
-        <div className="max-w-6xl mx-auto text-center text-[#6b2020]/80 text-sm">
-          <span className="font-semibold text-[#a12222]">Acknowledgements & Sources:</span>{" "}
-          Historical and language information draws on Blackfoot community language and cultural initiatives; scholarship on Niitsíʼpowahsin and Blackfoot history; and educational/public reference materials.{" "}
-          <span className="uppercase text-xs tracking-wide text-[#6b2020]/70">
-            With deep respect to Blackfoot elders, speakers, and knowledge keepers.
-          </span>
         </div>
-      </div>
+      </header>
 
-    </div>
+      <section className="pb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
+          {CARDS.map((c) => {
+            const Icon = c.icon;
+            const tone = cardTone(c.tone);
+
+            return (
+              <Card
+                key={c.to}
+                as={Link}
+                to={c.to}
+                className={[
+                  "group p-5",
+                  "border",
+                  tone.border,
+                  "hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-900/5",
+                  "transition",
+                ].join(" ")}
+              >
+                <div className="flex items-start gap-4">
+                  <div
+                    className={[
+                      "grid h-12 w-12 place-items-center rounded-xl",
+                      tone.iconWrap,
+                    ].join(" ")}
+                  >
+                    <Icon className={["h-6 w-6", tone.icon].join(" ")} aria-hidden="true" />
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <h2 className="text-base sm:text-lg font-semibold text-[var(--text)]">
+                        {c.title}
+                      </h2>
+                      <ArrowRight
+                        className="h-5 w-5 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition"
+                        aria-hidden="true"
+                      />
+                    </div>
+
+                    <p className="mt-1 text-sm text-[var(--muted)] leading-relaxed">
+                      {c.description}
+                    </p>
+
+                    <div className="mt-4">
+                      <span
+                        className={[
+                          "inline-flex items-center rounded-full border px-2.5 py-1 text-xs",
+                          tone.badge,
+                        ].join(" ")}
+                      >
+                        {c.meta}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      </section>
+
+      <footer className="pb-10">
+        <Card className="p-5 text-sm text-[var(--muted)]">
+          <div className="font-medium text-[var(--text)]">
+            Acknowledgements & Sources
+          </div>
+          <p className="mt-2 leading-relaxed">
+            Historical and language information draws on Blackfoot community
+            language and cultural initiatives; scholarship on Niitsíʼpowahsin and
+            Blackfoot history; and educational/public reference materials.
+          </p>
+          <p className="mt-2 text-xs uppercase tracking-wide text-[var(--muted)]">
+            With deep respect to Blackfoot elders, speakers, and knowledge
+            keepers.
+          </p>
+        </Card>
+      </footer>
+    </Page>
   );
 }

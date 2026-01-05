@@ -12,14 +12,64 @@ code {
 .backface-hidden { backface-visibility: hidden; }
 .rotate-y-180 { transform: rotateY(-180deg); }
 
+/* -------------------------------------------------------------------------- */
+/*                                 APP THEME                                  */
+/* -------------------------------------------------------------------------- */
+
+:root {
+  /* Keep the same palette, but standardize tokens */
+  --bg: #fffaf8;
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-2: rgba(255, 255, 255, 0.65);
+
+  --text: #6b2020;
+  --muted: rgba(107, 32, 32, 0.72);
+
+  --brand: #a12222;      /* heading red */
+  --brand-2: #c54b4b;    /* navbar red */
+  --gold: #d4af37;
+
+  --border: rgba(212, 175, 55, 0.45);
+  --ring: rgba(161, 34, 34, 0.35);
+
+  --radius: 16px;
+}
+
+html {
+  color-scheme: light;
+}
+
 body {
-  background-color: #fffaf8; /* soft beige background */
-  color: #6b2020; /* dark reddish-brown text */
-  font-family: 'Georgia', 'Times New Roman', serif;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: theme('fontFamily.sans');
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3 {
-  color: #a12222; /* MeTILDA-style heading red */
+  color: var(--brand);
 }
 
+/* Better focus styles across the whole app */
+:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 10px;
+}
 
+/* Utility: subtle paper background used across many screens */
+.app-paper {
+  background:
+    radial-gradient(1200px 900px at 20% 10%, rgba(212,175,55,0.10), transparent 55%),
+    radial-gradient(1200px 900px at 80% 0%, rgba(197,75,75,0.08), transparent 55%),
+    linear-gradient(180deg, rgba(255,250,248,1), rgba(255,246,238,1));
+}
+
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(8px);
+}

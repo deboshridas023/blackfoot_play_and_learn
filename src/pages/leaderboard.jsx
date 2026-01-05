@@ -1,8 +1,13 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import TopActions, { BackButton, ExitButton } from "../components/ui/TopActions";
+import Button from "../components/ui/Button";
 import { auth, db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { ChevronLeft, Home, Trophy } from "lucide-react";
 
 function classNames(...xs) {
   return xs.filter(Boolean).join(" ");
@@ -80,16 +85,14 @@ function LeaderboardTable({ title, items, scoreKey, currentEmail }) {
   const ranked = useMemo(() => rankWithTies(items, scoreKey), [items, scoreKey]);
 
   return (
-    <section className="rounded-2xl border border-[#d4af37]/50 bg-white/80 shadow-sm backdrop-blur">
-      <header className="flex items-center justify-between p-4 sm:p-5 border-b border-[#d4af37]/40">
-        <h3 className="text-lg sm:text-xl font-semibold text-[#a12222]">{title}</h3>
-        <span className="text-xs sm:text-sm text-[#6b2020]/70">
-          Players: {items.length}
-        </span>
+    <Card className="border border-rose-200/70">
+      <header className="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border)]">
+        <h3 className="text-base sm:text-lg font-semibold text-[var(--text)]">{title}</h3>
+        <span className="text-xs sm:text-sm text-[var(--muted)]">Players: {items.length}</span>
       </header>
 
       {items.length === 0 ? (
-        <div className="p-6 text-center text-[#6b2020]/70">No scores yet.</div>
+        <div className="p-6 text-center text-[var(--muted)]">No scores yet.</div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full border-separate border-spacing-0">
@@ -119,14 +122,14 @@ function LeaderboardTable({ title, items, scoreKey, currentEmail }) {
                           className={classNames(
                             "inline-flex h-7 min-w-7 items-center justify-center rounded-full border px-2",
                             isTop
-                              ? "border-[#d4af37] bg-[#fff5d6] text-[#6b2020] font-semibold"
-                              : "border-[#d4af37]/50 text-[#6b2020]"
+                              ? "border-[var(--border)] bg-amber-50/70 text-[var(--text)] font-semibold"
+                              : "border-[var(--border)] text-[var(--text)]"
                           )}
                           title={`Rank #${row.rank}`}
                         >
                           {row.rank}
                         </span>
-                        {isTop && <span className="text-lg">🏆</span>}
+                        {isTop && <Trophy className="h-4 w-4 text-amber-700" aria-hidden="true" />}
                       </div>
                     </td>
 
@@ -172,7 +175,7 @@ function LeaderboardTable({ title, items, scoreKey, currentEmail }) {
           </table>
         </div>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -204,34 +207,27 @@ export default function Leaderboard() {
   }, [rows]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#fffaf8] via-[#fff7ef] to-[#ffeeda] text-[#381010]">
+    <Page variant="paper">
       <Navbar />
 
-      <div className="flex justify-between px-6 mt-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          ← Back
-        </button>
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          Exit & Return Home
-        </button>
-      </div>
-
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-        <header className="mb-6 sm:mb-8">
-          <h1 className="font-serif text-3xl sm:text-4xl text-[#6b2020] tracking-tight">
+      <div className="pt-8">
+        <header>
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            Progress
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
             Leaderboard
           </h1>
-          <p className="mt-2 text-sm sm:text-base text-[#6b2020]/80">
-            See how everyone is doing across games. Scores update as you play.
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Scores update as you play.
           </p>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <TopActions
+            left={<BackButton onClick={() => navigate(-1)} icon={ChevronLeft} />}
+            right={<ExitButton onClick={() => navigate("/")} icon={Home} />}
+          />
+
+          <div className="mt-6 flex flex-wrap gap-2">
             {[
               { key: "overall", label: "Overall" },
               { key: "quiz", label: "Quiz" },
@@ -240,19 +236,18 @@ export default function Leaderboard() {
             ].map((t) => {
               const active = tab === t.key;
               return (
-                <button
+                <Button
                   key={t.key}
+                  type="button"
                   onClick={() => setTab(t.key)}
+                  variant={active ? "primary" : "secondary"}
                   className={classNames(
-                    "inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition",
-                    active
-                      ? "bg-[#a12222] text-white border-[#a12222]"
-                      : "bg-white/80 text-[#6b2020] border-[#d4af37]/60 hover:bg-[#fff5d6]"
+                    "rounded-full",
+                    active ? "" : "bg-white/70"
                   )}
                 >
                   {t.label}
-                  {active && <span>•</span>}
-                </button>
+                </Button>
               );
             })}
           </div>
@@ -272,7 +267,7 @@ export default function Leaderboard() {
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="mt-8 pb-12 space-y-6">
             {tab === "overall" && (
               <LeaderboardTable
                 title="Overall Leaderboard"
@@ -307,7 +302,7 @@ export default function Leaderboard() {
             )}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </Page>
   );
 }

@@ -1,5 +1,9 @@
 import Navbar from "../components/navbar";
 import { useNavigate } from "react-router-dom";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import TopActions, { ExitButton } from "../components/ui/TopActions";
+import { Home, History as TimelineIcon, BookOpen } from "lucide-react";
 
 const hero = {
   eyebrow: "History & Language",
@@ -104,63 +108,61 @@ const timeline = [
 
 function HistoryHero({ eyebrow, title, intro = [] }) {
   return (
-    <header className="bg-[#fffaf8] text-[#6b2020]">
-      <div className="max-w-4xl mx-auto px-6 py-10 sm:py-14">
-        {eyebrow && (
-          <p className="text-sm tracking-[0.18em] uppercase text-[#a12222] font-semibold">
-            {eyebrow}
-          </p>
-        )}
-        <h1 className="mt-2 text-3xl sm:text-4xl lg:text-5xl font-serif font-extrabold">
-          {title}
-        </h1>
-        <div className="mt-5 space-y-3 text-[1.05rem] leading-7 text-[#6b2020]/90 text-justify">
-          {intro.map((para, idx) => (
-            <p key={idx} className="text-justify">{para}</p>
-          ))}
-        </div>
+    <Card className="p-6 sm:p-8 border border-rose-200/70">
+      {eyebrow && (
+        <p className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+          {eyebrow}
+        </p>
+      )}
+      <h1 className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+        {title}
+      </h1>
+      <div className="mt-4 space-y-3 text-sm sm:text-base leading-relaxed text-[var(--muted)]">
+        {intro.map((para, idx) => (
+          <p key={idx}>{para}</p>
+        ))}
       </div>
-    </header>
+    </Card>
   );
 }
 
 function HistorySection({ id, title, body = [] }) {
   return (
-    <section id={id} className="bg-[#fffaf8] text-[#6b2020]">
-      <div className="max-w-4xl mx-auto px-6 py-8 sm:py-10">
-        <h2 className="text-2xl sm:text-3xl font-serif font-extrabold">
+    <section id={id}>
+      <Card className="p-6 sm:p-8 border border-rose-200/70">
+        <h2 className="text-lg sm:text-xl font-semibold text-[var(--text)]">
           {title}
         </h2>
 
-        <div className="mt-4 space-y-3 text-[1.05rem] leading-7 text-[#6b2020]/90 text-justify">
+        <div className="mt-3 space-y-3 text-sm sm:text-base leading-relaxed text-[var(--muted)]">
           {body.map((para, idx) => (
-            <p key={idx} className="text-justify">{para}</p>
+            <p key={idx}>{para}</p>
           ))}
         </div>
-      </div>
+      </Card>
     </section>
   );
 }
 
 function Timeline({ items = [] }) {
   return (
-    <ol className="relative border-s-2 border-[#b55656]/30 ms-4">
+    <ol className="relative border-s-2 border-rose-200/80 ms-4">
       {items.map((it, idx) => (
         <li key={idx} className="mb-8 ms-6">
           <span
-            className="absolute -start-3 flex h-5 w-5 items-center justify-center rounded-full bg-[#fffaf8] ring-2 ring-[#b55656]/40"
+            className="absolute -start-3 flex h-5 w-5 items-center justify-center rounded-full bg-white ring-2 ring-rose-300/40"
             aria-hidden="true"
           >
-            <span className="h-2.5 w-2.5 rounded-full bg-[#d4af37]" />
+            <span className="h-2.5 w-2.5 rounded-full bg-[var(--gold)]" />
           </span>
 
-          <div className="text-[#a12222] text-sm uppercase tracking-wide font-semibold">
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
             {it.eraOrYear}
           </div>
-          <h3 className="mt-1 text-xl font-serif font-extrabold text-[#6b2020]">
+          <h3 className="mt-1 text-base sm:text-lg font-semibold text-[var(--text)]">
             {it.title}
           </h3>
-          <p className="mt-2 text-[#6b2020]/90 leading-7 text-justify">{it.description}</p>
+          <p className="mt-2 text-sm sm:text-base text-[var(--muted)] leading-relaxed">{it.description}</p>
         </li>
       ))}
     </ol>
@@ -175,70 +177,73 @@ export default function History() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#fffaf8] text-[#6b2020]">
+    <Page variant="paper">
       <Navbar />
 
-      {/* Exit button */}
-      <div className="flex justify-end px-6 mt-4">
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          Exit & Return Home
-        </button>
+      <div className="pt-8">
+        <header>
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            Cultural section
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+            Blackfoot history
+          </h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Background context for the language and stories in this app.
+          </p>
+
+          <TopActions right={<ExitButton onClick={() => navigate("/")} icon={Home} />} />
+        </header>
+
+        <main aria-label="Blackfoot history content" className="mt-8 pb-12">
+          <div className="grid gap-6 max-w-4xl">
+            <HistoryHero eyebrow={hero.eyebrow} title={hero.title} intro={hero.intro} />
+
+            {sections.map((s) => (
+              <HistorySection key={s.id} id={s.id} title={s.title} body={s.body} />
+            ))}
+
+            <Card className="p-6 sm:p-8 border border-rose-200/70">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-amber-50 to-white ring-1 ring-amber-300/40">
+                  <TimelineIcon className="h-5 w-5 text-amber-700" aria-hidden="true" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-semibold text-[var(--text)]">
+                  Timeline
+                </h2>
+              </div>
+              <div className="mt-6">
+                <Timeline items={timeline} />
+              </div>
+            </Card>
+
+            <Card id="revitalization" className="p-6 sm:p-8 border border-rose-200/70">
+              <div className="flex items-center gap-3">
+                <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-rose-50 to-white ring-1 ring-rose-300/40">
+                  <BookOpen className="h-5 w-5 text-[var(--brand)]" aria-hidden="true" />
+                </div>
+                <h2 className="text-lg sm:text-xl font-semibold text-[var(--text)]">
+                  Revitalization today
+                </h2>
+              </div>
+
+              <p className="mt-4 text-sm sm:text-base leading-relaxed text-[var(--muted)]">
+                Despite the hardships of the past, Blackfoot culture and language
+                continue to endure through the dedication of elders, educators,
+                and community members. Across Montana and Alberta, language
+                programs, immersion schools, cultural gatherings, and digital
+                learning tools are helping younger generations reconnect with
+                Niitsíʼpowahsin. Many Blackfoot families are reclaiming
+                traditional stories, songs, and teachings once suppressed by
+                colonial policies. Today, revitalization is not only about
+                preserving words—it is about restoring identity, strengthening
+                community, and ensuring that Blackfoot knowledge continues to
+                thrive far into the future.
+              </p>
+            </Card>
+          </div>
+        </main>
       </div>
-
-      <HistoryHero
-        eyebrow={hero.eyebrow}
-        title={hero.title}
-        intro={hero.intro}
-      />
-
-      <main aria-label="Blackfoot history content">
-        {sections.map((s) => (
-          <HistorySection
-            key={s.id}
-            id={s.id}
-            title={s.title}
-            body={s.body}
-          />
-        ))}
-
-        {/* Timeline */}
-        <section className="bg-[#fffaf8] text-[#6b2020]">
-          <div className="max-w-4xl mx-auto px-6 py-10">
-            <h2 className="text-2xl sm:text-3xl font-serif font-extrabold">
-              Timeline
-            </h2>
-            <div className="mt-6">
-              <Timeline items={timeline} />
-            </div>
-          </div>
-        </section>
-
-        {/* Revitalization Section */}
-        <section id="revitalization" className="bg-[#fffaf8] text-[#6b2020]">
-          <div className="max-w-4xl mx-auto px-6 py-10">
-            <h2 className="text-2xl sm:text-3xl font-serif font-extrabold">
-              Revitalization Today
-            </h2>
-
-            <p className="mt-4 text-[1.05rem] leading-7 text-[#6b2020]/90 text-justify">
-              Despite the hardships of the past, Blackfoot culture and language
-              continue to endure through the dedication of elders, educators,
-              and community members. Across Montana and Alberta, language
-              programs, immersion schools, cultural gatherings, and digital
-              learning tools are helping younger generations reconnect with
-              Niitsíʼpowahsin. Many Blackfoot families are reclaiming
-              traditional stories, songs, and teachings once suppressed by
-              colonial policies. Today, revitalization is not only about
-              preserving words—it is about restoring identity, strengthening
-              community, and ensuring that Blackfoot knowledge continues to
-              thrive far into the future.
-            </p>
-          </div>
-        </section>
-      </main>
-    </div>
+    </Page>
   );
 }

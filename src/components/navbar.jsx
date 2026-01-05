@@ -2,6 +2,8 @@ import { signOut } from "firebase/auth";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import { GraduationCap, LogOut, UserRound } from "lucide-react";
+import Button from "./ui/Button";
 
 export default function Navbar() {
   const navigate = useNavigate();
@@ -25,37 +27,47 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="w-full bg-[#c54b4b] text-[#fffaf8] py-4 shadow-md">
-      <div className="w-full flex justify-between items-center px-6">
+    <nav className="w-full bg-[var(--brand-2)] text-white/95 shadow-sm">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-4 flex flex-wrap gap-3 justify-between items-center">
         
         {/* Brand */}
-        <h1 className="text-2xl font-serif tracking-wider">
-          <span className="px-3 py-1 bg-[#fffaf8]/20 rounded-md">
-            Blackfoot · <span className="text-[#ffd28c]">Play & Learn</span>
-          </span>
-        </h1>
+        <div className="flex items-center gap-3">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-white/10 ring-1 ring-white/15">
+            <GraduationCap className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <div className="leading-tight">
+            <div className="text-xs uppercase tracking-[0.18em] text-white/70">
+              Blackfoot
+            </div>
+            <div className="text-lg sm:text-xl font-semibold tracking-tight">
+              Play & Learn
+            </div>
+          </div>
+        </div>
 
         {/* Account + Logout */}
-        <div className="flex items-center gap-4">
-          <div className="text-right leading-tight max-w-[320px]">
-            <div className="text-[11px] uppercase tracking-wider text-[#fffaf8]/80">
-              Account
-            </div>
-            <div
-              className="text-sm font-medium truncate"
-              title={accountEmail}
-            >
-              {accountEmail}
+        <div className="flex items-center gap-3 sm:gap-4">
+          <div className="hidden sm:flex items-center gap-2 text-right leading-tight max-w-[320px]">
+            <UserRound className="h-4 w-4 text-white/70" aria-hidden="true" />
+            <div className="min-w-0">
+              <div className="text-[11px] uppercase tracking-wider text-white/70">
+                Account
+              </div>
+              <div className="text-sm font-medium truncate" title={accountEmail}>
+                {accountEmail}
+              </div>
             </div>
           </div>
 
-          <button
+          <Button
             onClick={handleExit}
-            className="px-4 py-1 border border-[#ffd28c] text-[#ffd28c] rounded 
-                       hover:bg-[#ffd28c]/20 transition-all duration-200"
+            variant="secondary"
+            size="sm"
+            leftIcon={LogOut}
+            className="bg-white/10 text-white border-white/20 hover:bg-white/15"
           >
             Logout
-          </button>
+          </Button>
         </div>
 
       </div>

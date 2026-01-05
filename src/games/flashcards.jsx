@@ -1,39 +1,47 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
-import { db, storage } from "../firebase";
-import { ref, getDownloadURL } from "firebase/storage";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
+import { ref, getDownloadURL } from "firebase/storage";
+
+import { db, storage } from "../firebase";
 import Navbar from "../components/navbar";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import TopActions, { BackButton, ExitButton } from "../components/ui/TopActions";
+import Button from "../components/ui/Button";
+import { ChevronLeft, Home, RotateCcw, Volume2 } from "lucide-react";
 
 export default function Flashcards() {
   const { theme } = useParams();
   const navigate = useNavigate();
+
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [completed, setCompleted] = useState(false);
+
   const [loading, setLoading] = useState(true);
   const [cards, setCards] = useState([]);
+
   const audioRef = useRef(null);
   const [image, setImage] = useState(null);
+
+  const capitalize = (str) =>
+    str.charAt(0).toUpperCase() + str.slice(1);  
 
   useEffect(() => {
     let cancelled = false;
     async function loadCards() {
       try {
         setLoading(true);
-        const colRef = collection(
-          db,
-          `flashcards/dnvSyiAbhumktOGFUy3s/${theme}`
-        );
+        const colRef = collection(db, `flashcards/dnvSyiAbhumktOGFUy3s/${theme}`);
         const snap = await getDocs(colRef);
         const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        if (cancelled) return;
 
-        if (!cancelled) {
-          setCards(data);
-          setIndex(0);
-          setFlipped(false);
-          setCompleted(false);
-        }
+        setCards(data);
+        setIndex(0);
+        setFlipped(false);
+        setCompleted(false);
       } catch (err) {
         console.error("Firestore error:", err);
       } finally {
@@ -50,9 +58,7 @@ export default function Flashcards() {
     const prevBodyOverflowX = document.body.style.overflowX;
     const prevBodyScrollbarGutter = document.body.style.scrollbarGutter;
 
-    // Prevent temporary horizontal overflow during the flip from triggering a scrollbar.
     document.body.style.overflowX = "hidden";
-    // Keep layout width stable even if scrollbars appear/disappear.
     document.body.style.scrollbarGutter = "stable";
 
     return () => {
@@ -61,68 +67,61 @@ export default function Flashcards() {
     };
   }, []);
 
+  // Stop audio on flip/index
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
   }, [flipped, index]);
 
+  // Load the image for the current card
   useEffect(() => {
+    let cancelled = false;
+
     async function loadImage() {
       try {
-        if (!cards[index]?.image) {
+        const imgName = cards[index]?.image;
+        if (!imgName) {
           setImage(null);
           return;
         }
-        const imageRef = ref(
-          storage,
-          `blackfootimages/${cards[index].image}`
-        );
+        const imageRef = ref(storage, `blackfootimages/${imgName}`);
         const url = await getDownloadURL(imageRef);
-        setImage(url);
+        if (!cancelled) setImage(url);
       } catch (err) {
         console.error("Image fetch error:", err);
-        setImage(null);
+        if (!cancelled) setImage(null);
       }
     }
+
     loadImage();
+    return () => {
+      cancelled = true;
+    };
   }, [index, cards]);
 
-  if (loading)
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f1ec] text-[#6b2020]">
-        <p>Loading cards...</p>
-      </div>
-    );
-
-  if (!cards.length)
-    return (
-      <div className="text-[#6b2020] text-center p-20 bg-[#f8f1ec]">
-        No flashcards found for: {theme}
-      </div>
-    );
-
-  const current = cards[index];
   const totalCards = cards.length;
   const coveredCards = Math.min(index + 1, totalCards);
-  const progressPercent = totalCards
-    ? Math.round((coveredCards / totalCards) * 100)
-    : 0;
+  const progressPercent = totalCards ? Math.round((coveredCards / totalCards) * 100) : 0;
 
-  const handleFlip = () => setFlipped(!flipped);
+  const current = useMemo(() => cards[index], [cards, index]);
+
+  const handleFlip = () => setFlipped((v) => !v);
   const handleNext = () => {
     if (index + 1 < cards.length) {
-      setIndex(index + 1);
+      setIndex((i) => i + 1);
       setFlipped(false);
-    } else setCompleted(true);
+    } else {
+      setCompleted(true);
+    }
   };
   const handlePrev = () => {
     if (index > 0) {
-      setIndex(index - 1);
+      setIndex((i) => i - 1);
       setFlipped(false);
     }
   };
+
   const restart = () => {
     const shuffled = [...cards].sort(() => Math.random() - 0.5);
     setCards(shuffled);
@@ -140,74 +139,122 @@ export default function Flashcards() {
       else audioRef.current.src = url;
       await audioRef.current.play();
     } catch (err) {
-      console.error("🎵 Audio playback error:", err);
+      console.error("Audio playback error:", err);
     }
+  }
+
+  if (loading) {
+    return (
+      <Page className="flex items-center" containerClassName="py-16" variant="paper">
+        <div className="w-full max-w-xl mx-auto text-center text-[var(--muted)]">
+          Loading cards…
+        </div>
+      </Page>
+    );
+  }
+
+  if (!cards.length) {
+    return (
+      <Page containerClassName="py-16" variant="paper">
+        <Navbar />
+        <div className="mx-auto max-w-2xl pt-10">
+          <Card className="p-6 text-center">
+            <div className="text-sm text-[var(--muted)]">No flashcards found for:</div>
+            <div className="mt-1 text-lg font-semibold text-[var(--text)]">
+              {theme}
+            </div>
+            <div className="mt-6 flex justify-center">
+              <Button
+                onClick={() => navigate("/games/flashcardthemes")}
+                variant="secondary"
+                leftIcon={ChevronLeft}
+              >
+                Back to Themes
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </Page>
+    );
   }
 
   if (completed) {
     return (
-      <div className="min-h-screen bg-[#f8f1ec] text-[#6b2020] flex flex-col items-center justify-center space-y-6">
-        <h2 className="text-3xl font-serif tracking-wide">
-          You completed {theme}!
-        </h2>
-        <div className="flex gap-6">
-          <button
-            onClick={restart}
-            className="px-5 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f]"
-          >
-            Restart
-          </button>
-          <button
-            onClick={() => navigate("/games/flashcardthemes")}
-            className="px-5 py-2 border border-[#d4af37] text-[#6b2020] rounded hover:bg-[#d4af37]/20"
-          >
-            Back to Themes
-          </button>
+      <Page className="flex items-center" containerClassName="py-16" variant="paper">
+        <Navbar />
+        <div className="w-full max-w-xl mx-auto pt-10">
+          <Card className="p-6 sm:p-8 text-center">
+            <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+              Flashcards
+            </div>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-semibold text-[var(--text)]">
+              Theme completed
+            </h2>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              You finished <span className="font-medium text-[var(--text)]">{theme}</span>.
+            </p>
+
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button onClick={restart} leftIcon={RotateCcw}>
+                Restart
+              </Button>
+              <Button
+                onClick={() => navigate("/games/flashcardthemes")}
+                variant="secondary"
+                leftIcon={ChevronLeft}
+              >
+                Back to Themes
+              </Button>
+              <Button
+                onClick={() => navigate("/")}
+                variant="secondary"
+                leftIcon={Home}
+              >
+                Home
+              </Button>
+            </div>
+          </Card>
         </div>
-      </div>
+      </Page>
     );
   }
 
   return (
-    <div
-      className="min-h-screen flex flex-col text-[#6b2020] overflow-x-hidden"
-      style={{
-        background:
-          "linear-gradient(rgba(247, 230, 228, 0.95), rgba(240, 220, 216, 0.98)), url('https://www.transparenttextures.com/patterns/aged-paper.png')",
-        backgroundRepeat: "repeat",
-      }}
-    >
+    <Page className="overflow-x-hidden" variant="paper">
       <Navbar />
 
-      {/* ⭐ Unified Button Bar — SAME styling & same row */}
-      <div className="flex justify-between px-6 mt-4">
-        <button
-          onClick={() => navigate("/games/flashcardthemes")}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          ← Back to Themes
-        </button>
+      <div className="pt-8">
+        <header>
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            Flashcards
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+            {capitalize(theme)}
+          </h1>
 
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          Exit Game & Return Home
-        </button>
-      </div>
+          <TopActions
+            left={
+              <BackButton
+                onClick={() => navigate("/games/flashcardthemes")}
+                icon={ChevronLeft}
+              >
+                Back to Themes
+              </BackButton>
+            }
+            right={<ExitButton onClick={() => navigate("/")} icon={Home} />}
+          />
+        </header>
 
-      {/* Progress (outside the flashcard) */}
-      <div className="px-6 mt-6">
-        <div className="mx-auto w-full max-w-[420px]">
-          <div className="flex items-center justify-between text-sm">
-            <span className="font-medium text-[#6b2020]">Progress</span>
-            <span className="text-[#6b2020]/80">
-              {coveredCards}/{totalCards}
+        {/* Progress */}
+        <div className="mt-6 max-w-xl">
+          <div className="flex items-center justify-between text-xs text-[var(--muted)] mb-1">
+            <span>Progress</span>
+            <span>
+              {coveredCards}/{totalCards} ({progressPercent}%)
             </span>
           </div>
-
           <div
-            className="mt-2 h-2 w-full rounded-full bg-[#f0d7d7] overflow-hidden"
+            className="h-2 w-full rounded-full bg-amber-50/70 overflow-hidden border border-[var(--border)]"
             role="progressbar"
             aria-label="Flashcards progress"
             aria-valuenow={coveredCards}
@@ -215,88 +262,80 @@ export default function Flashcards() {
             aria-valuemax={totalCards}
           >
             <div
-              className="h-full rounded-full bg-[#d4af37] transition-all duration-300"
+              className="h-full bg-[var(--gold)] transition-all duration-300"
               style={{ width: `${progressPercent}%` }}
             />
           </div>
         </div>
-      </div>
 
-      <div className="flex flex-1 items-center justify-center p-6">
-        <div className="relative w-[320px] h-[460px] sm:w-[380px] sm:h-[500px] perspective overflow-hidden">
-          <div
-            className={`relative w-full h-full duration-500 transform-style-preserve-3d ${
-              flipped ? "rotate-y-180" : ""
-            }`}
-          >
-            {/* FRONT */}
+        <div className="mt-8 flex items-center justify-center pb-12">
+          <div className="relative w-[320px] h-[460px] sm:w-[380px] sm:h-[500px] perspective overflow-hidden">
             <div
-              onClick={handleFlip}
-              className="absolute w-full h-full bg-[#fff2f2] rounded-2xl shadow-[0_8px_24px_rgba(197,75,75,0.3)]
-                         p-6 border border-[#e3a4a4] backface-hidden flex flex-col items-center justify-center gap-6 cursor-pointer"
+              className={`relative w-full h-full duration-500 transform-style-preserve-3d ${
+                flipped ? "rotate-y-180" : ""
+              }`}
             >
-              <p className="text-3xl font-serif tracking-wide text-[#a12222]">
-                {current.english}
-              </p>
-              <p className="text-sm text-[#6b2020]/70">(tap to flip)</p>
-            </div>
+              {/* FRONT */}
+              <Card
+                onClick={handleFlip}
+                className="absolute w-full h-full p-6 backface-hidden flex flex-col items-center justify-center gap-6 cursor-pointer border border-rose-200/70"
+              >
+                <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)] text-center">
+                  {current?.english}
+                </p>
+                <p className="text-sm text-[var(--muted)]">Tap to flip</p>
+              </Card>
 
-            {/* BACK */}
-            <div
-              className="absolute w-full h-full bg-[#fff2f2] rounded-2xl shadow-[0_8px_24px_rgba(197,75,75,0.3)]
-                         p-6 border border-[#e3a4a4] backface-hidden flex flex-col justify-between rotate-y-180"
-            >
-              <div className="text-2xl font-serif text-center mt-4 text-[#a12222]">
-                {current.blackfoot}
-              </div>
-
-              <div className="flex flex-col items-center justify-center text-[#6b2020]">
-                <div className="text-lg mb-2">
-                  🎧 {current.audio || "No audio file"}
+              {/* BACK */}
+              <Card className="absolute w-full h-full p-6 backface-hidden flex flex-col justify-between rotate-y-180 border border-rose-200/70">
+                <div className="text-xl sm:text-2xl font-semibold text-center mt-2 text-[var(--text)]">
+                  {current?.blackfoot}
                 </div>
-                {current.audio && (
-                  <button
-                    onClick={playAudio}
-                    className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition"
-                  >
-                    ▶ Play Audio
-                  </button>
-                )}
-              </div>
 
-              <div className="flex justify-center mt-4">
-                {image ? (
-                  <img
-                    src={image}
-                    alt={current.english}
-                    className="w-48 h-48 object-cover rounded-lg border border-[#e3a4a4]"
-                  />
-                ) : (
-                  <div className="w-48 h-48 bg-[#f7dcdc] rounded-lg flex items-center justify-center text-[#a12222]/70 text-sm">
-                    No image
+                <div className="flex flex-col items-center justify-center gap-2 text-[var(--text)]">
+                  <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+                    Audio
                   </div>
-                )}
-              </div>
+                  <div className="text-sm text-[var(--muted)]">
+                    {current?.audio || "No audio file"}
+                  </div>
+                  {current?.audio && (
+                    <Button onClick={playAudio} leftIcon={Volume2}>
+                      Play audio
+                    </Button>
+                  )}
+                </div>
 
-              <div className="flex justify-between mt-6">
-                <button
-                  onClick={handlePrev}
-                  className="px-4 py-2 bg-[#d4af37] rounded text-black disabled:opacity-30"
-                  disabled={index === 0}
-                >
-                  Prev
-                </button>
-                <button
-                  onClick={handleNext}
-                  className="px-4 py-2 bg-[#d4af37] rounded text-black"
-                >
-                  Next
-                </button>
-              </div>
+                <div className="flex justify-center mt-3">
+                  {image ? (
+                    <img
+                      src={image}
+                      alt={current?.english}
+                      className="w-44 h-44 object-cover rounded-xl border border-[var(--border)]"
+                    />
+                  ) : (
+                    <div className="w-44 h-44 bg-white/50 rounded-xl border border-[var(--border)] flex items-center justify-center text-[var(--muted)] text-sm">
+                      No image
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between gap-3 mt-4">
+                  <Button
+                    onClick={handlePrev}
+                    variant="secondary"
+                    disabled={index === 0}
+                  >
+                    Prev
+                  </Button>
+                  <Button onClick={handleNext}>Next</Button>
+                </div>
+              </Card>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
+

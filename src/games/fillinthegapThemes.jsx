@@ -3,6 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
 import Navbar from "../components/navbar";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import TopActions, { ExitButton } from "../components/ui/TopActions";
+import Button from "../components/ui/Button";
+import { ArrowRight, Home, Layers3, Puzzle } from "lucide-react";
 
 // Firestore (matches your screenshot):
 // Collection: `blackfoot builder`
@@ -54,97 +59,125 @@ export default function FillInTheGapThemes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f1ec] text-[#6b2020]">
-        <p>Loading themes...</p>
-      </div>
+      <Page className="flex items-center" containerClassName="py-16" variant="paper">
+        <div className="w-full max-w-xl mx-auto text-center text-[var(--muted)]">
+          Loading themes…
+        </div>
+      </Page>
     );
   }
 
   // Empty state (nice UX until you create the collection)
   if (!themes.length) {
     return (
-      <div className="min-h-screen bg-[#f8f1ec] text-[#6b2020]">
+      <Page containerClassName="py-10" variant="paper">
         <Navbar />
-        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-          <h1 className="text-2xl font-serif mb-4">Blackfoot Builder Themes</h1>
-          <p>
-            No themes found in Firestore. Add documents to
-            <span className="font-mono"> blackfoot builder</span> to populate this
-            page.
-          </p>
 
-          <div className="mt-6 flex justify-center gap-3 flex-wrap">
-            <button
-              onClick={() => navigate("/")}
-              className="px-4 py-2 bg-[#c54b4b] text-[#fffaf8] rounded hover:bg-[#a63e3e] transition-all duration-200"
-            >
-              Return Home
-            </button>
-            <button
-              onClick={() => navigate("/games/fillinthegap")}
-              className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-            >
-              Play Default Builder
-            </button>
+        <header className="pt-10 pb-4">
+          <div className="max-w-4xl">
+            <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+              Blackfoot Builder
+            </div>
+            <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+              Themes
+            </h1>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              No themes found in Firestore yet.
+            </p>
           </div>
-        </div>
-      </div>
+
+          <TopActions
+            right={<ExitButton onClick={() => navigate("/")} icon={Home} />}
+          />
+        </header>
+
+        <Card className="p-6 text-center">
+          <div className="text-sm text-[var(--muted)]">
+            Add documents to <span className="font-mono">blackfoot builder</span>
+            {" "}to populate this page.
+          </div>
+
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Button onClick={() => navigate("/")} leftIcon={Home}>
+              Return home
+            </Button>
+            <Button
+              onClick={() => navigate("/games/fillinthegap")}
+              variant="secondary"
+              leftIcon={Puzzle}
+            >
+              Open builder (no theme)
+            </Button>
+          </div>
+        </Card>
+      </Page>
     );
   }
 
   return (
-    <div
-      className="min-h-screen bg-[#f8f1ec] text-[#6b2020]"
-      style={{
-        background:
-          "linear-gradient(rgba(247, 230, 228, 0.95), rgba(240, 220, 216, 0.98)), url('https://www.transparenttextures.com/patterns/aged-paper.png')",
-        backgroundRepeat: "repeat",
-      }}
-    >
+    <Page variant="paper">
       <Navbar />
 
-      <div className="flex justify-end px-6 mt-4">
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-[#c54b4b] text-[#fffaf8] rounded hover:bg-[#a63e3e] transition-all duration-200"
-        >
-          Exit & Return Home
-        </button>
-      </div>
+      <header className="pt-10 pb-4">
+        <div className="max-w-4xl">
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            Blackfoot Builder
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+            Choose a theme
+          </h1>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Fill in the missing word(s) using context and audio.
+          </p>
+        </div>
 
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <h1 className="text-3xl font-serif text-[#a12222] mb-6">
-          Blackfoot Builder Themes
-        </h1>
+        <TopActions right={<ExitButton onClick={() => navigate("/")} icon={Home} />} />
+      </header>
 
-        <div className="grid gap-5 md:grid-cols-2">
+      <section className="pb-10">
+        <div className="grid gap-4 md:grid-cols-2">
           {themes.map((t) => (
-            <button
+            <Card
               key={t.id}
+              as="button"
+              type="button"
               onClick={() => navigate(`/games/fillinthegap?themeId=${t.id}`)}
-              className="text-left bg-[#fff4f4] border border-[#e3a4a4] rounded-xl p-5 shadow-sm
-                         hover:shadow-md hover:border-[#d4af37] hover:shadow-[#d4af37]/40
-                         transition-all duration-200 cursor-pointer"
+              className="group text-left p-5 border border-rose-200/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-900/5 transition"
             >
-              <h2 className="text-xl font-semibold text-[#a12222] font-serif">
-                {t.englishtitle || "Untitled theme"}
-              </h2>
+              <div className="flex items-start gap-4">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-rose-50 to-white ring-1 ring-rose-300/40">
+                  <Layers3 className="h-6 w-6 text-[var(--brand)]" aria-hidden="true" />
+                </div>
 
-              {t.blackfoottitle && (
-                <p className="mt-1 text-sm text-[#6b2020]/80 italic">
-                  {t.blackfoottitle}
-                </p>
-              )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-base sm:text-lg font-semibold text-[var(--text)]">
+                        {t.englishtitle || "Untitled theme"}
+                      </h2>
+                      {t.blackfoottitle && (
+                        <p className="mt-1 text-sm text-[var(--muted)]">
+                          {t.blackfoottitle}
+                        </p>
+                      )}
+                    </div>
+                    <ArrowRight
+                      className="h-5 w-5 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition"
+                      aria-hidden="true"
+                    />
+                  </div>
 
-              {t.description && (
-                <p className="mt-3 text-sm leading-relaxed text-[#5a1b1b] line-clamp-3">
-                  {t.description}
-                </p>
-              )}
-            </button>
+                  {t.description && (
+                    <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed line-clamp-3">
+                      {t.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
-      </div>
-    </div>
+      </section>
+    </Page>
   );
 }

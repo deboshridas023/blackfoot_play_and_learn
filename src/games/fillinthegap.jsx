@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Navbar from "../components/navbar";
+import Page from "../components/ui/Page";
+import Card from "../components/ui/Card";
+import TopActions, { BackButton, ExitButton } from "../components/ui/TopActions";
+import Button from "../components/ui/Button";
 import { storage, db, auth } from "../firebase";
 import { ref, getDownloadURL } from "firebase/storage";
 import {
@@ -12,6 +16,7 @@ import {
   updateDoc,
   increment,
 } from "firebase/firestore";
+import { ChevronLeft, Home, RotateCcw, Volume2, Eraser, SkipForward } from "lucide-react";
 
 function normalize(s) {
   return (s || "")
@@ -296,243 +301,265 @@ export default function FillInTheGap() {
 
   if (completed) {
     return (
-      <div className="min-h-screen bg-[#f8f1ec] text-[#6b2020] flex flex-col items-center justify-center space-y-6">
-        <h2 className="text-3xl font-serif tracking-wide">
-          You completed Fill in the Gap!
-        </h2>
-        <div className="text-lg">Final Score: {score}</div>
-        <div className="flex gap-6">
-          <button
-            onClick={restart}
-            className="px-5 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f]"
-          >
-            Restart
-          </button>
-          <button
-            onClick={() => navigate("/games/fillinthegapthemes")}
-            className="px-5 py-2 border border-[#d4af37] text-[#6b2020] rounded hover:bg-[#d4af37]/20"
-          >
-            Back to Themes
-          </button>
-          <button
-            onClick={() => navigate("/")}
-            className="px-5 py-2 border border-[#d4af37] text-[#6b2020] rounded hover:bg-[#d4af37]/20"
-          >
-            Exit to Home
-          </button>
+      <Page className="flex items-center" containerClassName="py-16" variant="paper">
+        <Navbar />
+        <div className="w-full max-w-xl mx-auto pt-10">
+          <Card className="p-6 sm:p-8 text-center">
+            <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+              Blackfoot Builder
+            </div>
+            <h2 className="mt-2 text-2xl sm:text-3xl font-semibold text-[var(--text)]">
+              Session completed
+            </h2>
+            <p className="mt-2 text-sm text-[var(--muted)]">Final score: {score}</p>
+
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button onClick={restart} leftIcon={RotateCcw}>
+                Restart
+              </Button>
+              <Button
+                onClick={() => navigate("/games/fillinthegapthemes")}
+                variant="secondary"
+                leftIcon={ChevronLeft}
+              >
+                Back to Themes
+              </Button>
+              <Button
+                onClick={() => navigate("/")}
+                variant="secondary"
+                leftIcon={Home}
+              >
+                Home
+              </Button>
+            </div>
+          </Card>
         </div>
-      </div>
+      </Page>
     );
   }
 
   if (!themeId) {
     return (
-      <div className="min-h-screen bg-[#f8f1ec] text-[#6b2020]">
+      <Page containerClassName="py-10" variant="paper">
         <Navbar />
-        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-          <h1 className="text-2xl font-serif mb-4">Fill in the Gap</h1>
-          <div className="mt-6 flex justify-center gap-3 flex-wrap">
-            <button
-              onClick={() => navigate("/games/fillinthegapthemes")}
-              className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-            >
-              Go to Themes
-            </button>
-            <button
-              onClick={() => navigate("/")}
-              className="px-4 py-2 border border-[#d4af37] text-[#6b2020] rounded hover:bg-[#d4af37]/20 transition"
-            >
-              Exit to Home
-            </button>
+
+        <header className="pt-10 pb-4">
+          <div className="max-w-4xl">
+            <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+              Blackfoot Builder
+            </div>
+            <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+              Choose a theme to begin
+            </h1>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              Start from the Themes page to load a sentence set.
+            </p>
           </div>
-        </div>
-      </div>
+
+          <TopActions
+            left={
+              <BackButton
+                onClick={() => navigate("/games/fillinthegapthemes")}
+                icon={ChevronLeft}
+              >
+                Go to Themes
+              </BackButton>
+            }
+            right={<ExitButton onClick={() => navigate("/")} icon={Home} />}
+          />
+        </header>
+      </Page>
     );
   }
 
   if (levelsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f8f1ec] text-[#6b2020]">
-        <p>Loading builder sentences...</p>
-      </div>
+      <Page className="flex items-center" containerClassName="py-16" variant="paper">
+        <div className="w-full max-w-xl mx-auto text-center text-[var(--muted)]">
+          Loading builder sentences…
+        </div>
+      </Page>
     );
   }
 
   if (!current) {
     return (
-      <div className="min-h-screen bg-[#f8f1ec] text-[#6b2020]">
+      <Page containerClassName="py-10" variant="paper">
         <Navbar />
-        <div className="max-w-3xl mx-auto px-6 py-16 text-center">
-          <h1 className="text-2xl font-serif mb-4">Fill in the Gap</h1>
-          <p className="text-[#6b2020]/80">
-            No builder sentences found for this theme.
-          </p>
-          <div className="mt-6 flex justify-center gap-3 flex-wrap">
-            <button
-              onClick={() => navigate("/games/fillinthegapthemes")}
-              className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-            >
-              Back to Themes
-            </button>
-            <button
-              onClick={() => navigate("/")}
-              className="px-4 py-2 border border-[#d4af37] text-[#6b2020] rounded hover:bg-[#d4af37]/20 transition"
-            >
-              Exit to Home
-            </button>
-          </div>
+        <div className="pt-10">
+          <Card className="p-6 text-center">
+            <h1 className="text-xl sm:text-2xl font-semibold text-[var(--text)]">
+              No builder sentences found
+            </h1>
+            <p className="mt-2 text-sm text-[var(--muted)]">
+              This theme doesn’t have any sentences yet.
+            </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button
+                onClick={() => navigate("/games/fillinthegapthemes")}
+                variant="secondary"
+                leftIcon={ChevronLeft}
+              >
+                Back to Themes
+              </Button>
+              <Button
+                onClick={() => navigate("/")}
+                variant="secondary"
+                leftIcon={Home}
+              >
+                Home
+              </Button>
+            </div>
+          </Card>
         </div>
-      </div>
+      </Page>
     );
   }
 
   return (
-    <div
-      className="min-h-screen flex flex-col text-[#6b2020]"
-      style={{
-        background:
-          "linear-gradient(rgba(247, 230, 228, 0.95), rgba(240, 220, 216, 0.98)), url('https://www.transparenttextures.com/patterns/aged-paper.png')",
-        backgroundRepeat: "repeat",
-      }}
-    >
+    <Page variant="paper">
       <Navbar />
 
-      {/* ⭐ Unified Button Bar — consistent with Flashcards / Short Stories */}
-      <div className="flex justify-between px-6 mt-4">
-        <button
-          onClick={() => navigate("/games/fillinthegapthemes")}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          ← Back to Themes
-        </button>
+      <div className="pt-8">
+        <header>
+          <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+            Blackfoot Builder
+          </div>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)]">
+            Fill in the gap
+          </h1>
 
-        <button
-          onClick={() => navigate("/")}
-          className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition-all duration-200"
-        >
-          Exit Game & Return Home
-        </button>
-      </div>
+          <TopActions
+            left={
+              <BackButton
+                onClick={() => navigate("/games/fillinthegapthemes")}
+                icon={ChevronLeft}
+              >
+                Back to Themes
+              </BackButton>
+            }
+            right={<ExitButton onClick={() => navigate("/")} icon={Home} />}
+          />
+        </header>
 
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="relative w-[98vw] max-w-[1280px] h-[520px] sm:h-[540px]">
-          <div className="absolute w-full h-full bg-[#fff2f2] rounded-2xl shadow-[0_8px_24px_rgba(197,75,75,0.3)] p-6 border border-[#e3a4a4] flex flex-col justify-between">
-            {/* Header: Score */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-serif tracking-wide text-[#a12222]">
-                Fill in the Gap
-              </h2>
-              <div className="text-sm bg-[#d4af37]/20 text-[#6b2020] px-3 py-1 rounded border border-[#d4af37]">
-                Score: {score}
-              </div>
-            </div>
-            <div>
-            <div className="mt-3 flex flex-col items-center justify-center text-[#6b2020]">
-                <div className="text-lg mb-2">
-                  🎧 {current.audio ? current.audio : "Speech"}
+        <div className="mt-8 pb-12 flex justify-center">
+          <div className="w-full max-w-5xl">
+            <Card className="p-6 sm:p-7 border border-rose-200/70">
+              {/* Header: Score + Progress */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="text-sm text-[var(--muted)]">
+                  Level <span className="font-medium text-[var(--text)]">{levelIndex + 1}</span> of{" "}
+                  <span className="font-medium text-[var(--text)]">{levels.length}</span>
                 </div>
-                <button
+
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
+                  <span className="text-[var(--muted)]">Score</span>
+                  <span className="font-semibold">{score}</span>
+                </div>
+              </div>
+
+              {/* Audio */}
+              <div className="mt-6 grid place-items-center gap-2">
+                <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+                  Audio
+                </div>
+                <Button
                   onClick={playAudio}
                   disabled={audioBusy}
-                  className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition disabled:opacity-50"
+                  leftIcon={Volume2}
                 >
-                  {audioBusy ? "Loading..." : "▶ Play Audio"}
-                </button>
-              </div>
-            </div>
-            {/* Blackfoot sentence */}
-            <div className="text-center mt-2">
-              <div className="text-xs uppercase tracking-wider text-[#6b2020]/70 mb-2">
-                Blackfoot
-              </div>
-              <div className="text-2xl font-serif text-[#a12222]">
-                {current.blackfoot}
-              </div>
-            </div>
-
-            {/* English sentence with blank */}
-            <form onSubmit={handleSubmit} className="mt-6">
-              <div className="text-center mb-2">
-                <span className="text-xs uppercase tracking-wider text-[#6b2020]/70">
-                  English
-                </span>
-              </div>
-              <div
-                className="flex items-center justify-center gap-1 font-serif text-[#6b2020] whitespace-nowrap max-w-full overflow-x-hidden"
-                style={{ fontSize: "clamp(1rem, 2.1vw, 1.5rem)" }}
-              >
-                {templateParts.map((part, idx) => {
-                  const isBlank = idx < blanksCount;
-
-                  return (
-                    <span key={idx} className="flex items-center gap-2 shrink-0">
-                      <span>{part}</span>
-                      {isBlank && (
-                        <input
-                          autoFocus={idx === 0}
-                          value={inputs[idx] ?? ""}
-                          onChange={(e) => {
-                            const val = e.target.value;
-                            setInputs((prev) => {
-                              const next = [...prev];
-                              next[idx] = val;
-                              return next;
-                            });
-                          }}
-                          className="w-24 sm:w-28 md:w-32 text-center bg-transparent border-b-2 border-[#a12222] focus:outline-none focus:border-[#c54b4b] placeholder-[#a12222]/50 shrink-0"
-                          placeholder="type..."
-                        />
-                      )}
-                    </span>
-                  );
-                })}
-              </div>
-
-              {/* Feedback */}
-              {feedback && (
-                <div
-                  className={`mt-4 text-center text-sm ${
-                    feedback.type === "success"
-                      ? "text-green-700"
-                      : "text-[#a12222]"
-                  }`}
-                >
-                  {feedback.msg}
+                  {audioBusy ? "Loading…" : "Play"}
+                </Button>
+                <div className="text-xs text-[var(--muted)]">
+                  {current.audio ? current.audio : "Speech synthesis"}
                 </div>
-              )}
-
-              {/* Controls */}
-              <div className="mt-6 flex items-center justify-center gap-4">
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#d4af37] text-black rounded hover:bg-[#c09b2f] transition"
-                >
-                  Check Answer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setInputs((prev) => prev.map(() => ""))}
-                  className="px-4 py-2 border border-[#d4af37] text-[#6b2020] rounded hover:bg-[#d4af37]/20 transition"
-                >
-                  Clear
-                </button>
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  className="px-4 py-2 border border-[#d4af37] text-[#6b2020] rounded hover:bg-[#d4af37]/20 transition"
-                >
-                  Skip
-                </button>
               </div>
-            </form>
 
-            {/* Progress indicator */}
-            <div className="mt-4 text-center text-sm text-[#6b2020]/70">
-              {levelIndex + 1} of {levels.length}
-            </div>
+              {/* Sentences */}
+              <div className="mt-8 grid gap-6">
+                <div className="text-center">
+                  <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+                    Blackfoot
+                  </div>
+                  <div className="mt-2 text-xl sm:text-2xl font-semibold text-[var(--text)]">
+                    {current.blackfoot}
+                  </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="text-center">
+                  <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+                    English
+                  </div>
+
+                  <div
+                    className="mt-3 flex flex-wrap items-center justify-center gap-x-2 gap-y-3 text-[var(--text)]"
+                    style={{ fontSize: "clamp(1rem, 2.1vw, 1.25rem)" }}
+                  >
+                    {templateParts.map((part, idx) => {
+                      const isBlank = idx < blanksCount;
+
+                      return (
+                        <span key={idx} className="flex items-center gap-2">
+                          <span>{part}</span>
+                          {isBlank && (
+                            <input
+                              autoFocus={idx === 0}
+                              value={inputs[idx] ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                setInputs((prev) => {
+                                  const next = [...prev];
+                                  next[idx] = val;
+                                  return next;
+                                });
+                              }}
+                              className="w-24 sm:w-28 md:w-32 text-center rounded-md border border-[var(--border)] bg-white/80 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                              placeholder="type…"
+                            />
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+
+                  {feedback && (
+                    <div
+                      className={
+                        "mt-4 text-sm " +
+                        (feedback.type === "success"
+                          ? "text-emerald-700"
+                          : "text-rose-700")
+                      }
+                    >
+                      {feedback.msg}
+                    </div>
+                  )}
+
+                  <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    <Button type="submit">Check answer</Button>
+                    <Button
+                      type="button"
+                      onClick={() => setInputs((prev) => prev.map(() => ""))}
+                      variant="secondary"
+                      leftIcon={Eraser}
+                    >
+                      Clear
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleNext}
+                      variant="secondary"
+                      leftIcon={SkipForward}
+                    >
+                      Skip
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </Card>
           </div>
         </div>
       </div>
-    </div>
+    </Page>
   );
 }
