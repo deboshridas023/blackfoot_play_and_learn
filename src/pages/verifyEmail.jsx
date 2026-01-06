@@ -6,15 +6,37 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import { MailCheck, RefreshCw, LogOut } from "lucide-react";
 
+const RESEND_COOLDOWN_SECONDS = 60;
+const TOO_MANY_REQUESTS_COOLDOWN_SECONDS = 5 * 60;
+
 export default function VerifyEmail() {
   const [user, setUser] = useState(() => auth.currentUser);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const unsub = auth.onAuthStateChanged((u) => setUser(u));
     return () => unsub();
+  }, []);
+
+  const cooldownKey = useMemo(() => {
+    if (!user) return null;
+    // per-user cooldown; avoids spamming Firebase endpoint (auth/too-many-requests)
+    return `verifyEmailCooldown:${user.uid}`;
+  }, [user]);
+
+  useEffect(() => {
+    if (!cooldownKey) return;
+    const stored = Number(window.localStorage.getItem(cooldownKey) || "0");
+    setCooldownUntil(Number.isFinite(stored) ? stored : 0);
+  }, [cooldownKey]);
+
+  useEffect(() => {
+    const t = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(t);
   }, []);
 
   const canVerify = useMemo(() => {
@@ -22,16 +44,43 @@ export default function VerifyEmail() {
     return !!user && user.providerData?.some((p) => p.providerId === "password");
   }, [user]);
 
+  const secondsRemaining = useMemo(() => {
+    if (!cooldownUntil) return 0;
+    return Math.max(0, Math.ceil((cooldownUntil - now) / 1000));
+  }, [cooldownUntil, now]);
+
+  const setCooldown = (seconds) => {
+    const until = Date.now() + seconds * 1000;
+    setCooldownUntil(until);
+    if (cooldownKey) {
+      window.localStorage.setItem(cooldownKey, String(until));
+    }
+  };
+
   const handleResend = async () => {
     setError("");
     setInfo("");
     if (!user) return;
+
+    if (secondsRemaining > 0) {
+      setInfo(`Please wait ${secondsRemaining}s before resending.`);
+      return;
+    }
+
     setBusy(true);
     try {
       await sendEmailVerification(user);
       setInfo("Verification email sent. Check your inbox (and spam folder). ");
+      setCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (e) {
-      setError(e?.message || "Failed to send verification email.");
+      if (e?.code === "auth/too-many-requests") {
+        setCooldown(TOO_MANY_REQUESTS_COOLDOWN_SECONDS);
+        setError(
+          "Too many resend attempts. Please wait a few minutes, then try again."
+        );
+      } else {
+        setError(e?.message || "Failed to send verification email.");
+      }
     } finally {
       setBusy(false);
     }
@@ -124,12 +173,20 @@ export default function VerifyEmail() {
           <div className="mt-6 grid gap-3">
             <Button
               onClick={handleResend}
-              disabled={busy || !canVerify}
+              disabled={busy || !canVerify || secondsRemaining > 0}
               leftIcon={MailCheck}
               className="w-full"
             >
-              Resend verification email
+              {secondsRemaining > 0
+                ? `Resend verification email (${secondsRemaining}s)`
+                : "Resend verification email"}
             </Button>
+
+            {canVerify && secondsRemaining > 0 && (
+              <p className="-mt-2 text-xs text-[var(--muted)]">
+                For security, resends are limited. Please wait {secondsRemaining}s.
+              </p>
+            )}
 
             <Button
               onClick={handleRefresh}

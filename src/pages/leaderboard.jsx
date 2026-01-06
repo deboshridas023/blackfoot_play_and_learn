@@ -34,15 +34,18 @@ function useLeaderboardData() {
           const quiz = Number(data.quizScore || 0);
           const stories = Number(data.shortStoriesScore || 0);
           const builder = Number(data.builderScore || 0);
-          const email = d.id || data.email || "";
-          const display =
-            data.displayName ||
-            (email.includes("@") ? email.split("@")[0] : email || "Unknown");
+          // Privacy: never derive a public-facing display name from email.
+          // Only show explicit usernames (or a generic fallback).
+          const displayName =
+            typeof data.displayName === "string" && !data.displayName.includes("@")
+              ? data.displayName
+              : null;
+          const display = data.username || displayName || "Anonymous";
 
           return {
             id: d.id,
-            email,
             name: display,
+            username: data.username || null,
             quizScore: quiz,
             shortStoriesScore: stories,
             builderScore: builder,
@@ -82,16 +85,20 @@ function rankWithTies(sortedItems, scoreKey) {
 }
 
 function LeaderboardTable({ title, items, scoreKey, currentEmail }) {
-  const ranked = useMemo(() => rankWithTies(items, scoreKey), [items, scoreKey]);
+  const ranked = useMemo(() => {
+    // Hide zero scores (and any invalid/negative values) from the leaderboard.
+    const nonZero = (items || []).filter((x) => Number(x?.[scoreKey] ?? 0) > 0);
+    return rankWithTies(nonZero, scoreKey);
+  }, [items, scoreKey]);
 
   return (
     <Card className="border border-rose-200/70">
       <header className="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border)]">
         <h3 className="text-base sm:text-lg font-semibold text-[var(--text)]">{title}</h3>
-        <span className="text-xs sm:text-sm text-[var(--muted)]">Players: {items.length}</span>
+        <span className="text-xs sm:text-sm text-[var(--muted)]">Players: {ranked.length}</span>
       </header>
 
-      {items.length === 0 ? (
+      {ranked.length === 0 ? (
         <div className="p-6 text-center text-[var(--muted)]">No scores yet.</div>
       ) : (
         <div className="overflow-x-auto">
@@ -105,12 +112,12 @@ function LeaderboardTable({ title, items, scoreKey, currentEmail }) {
             </thead>
             <tbody>
               {ranked.map((row, i) => {
-                const isYou = row.email && currentEmail && row.email === currentEmail;
+                const isYou = row.id && currentEmail && row.id === currentEmail;
                 const isTop = row.rank === 1 && (row[scoreKey] ?? 0) > 0;
 
                 return (
                   <tr
-                    key={row.email || row.id || i}
+                    key={row.id || i}
                     className={classNames(
                       "text-sm",
                       i % 2 === 0 ? "bg-white/70" : "bg-amber-50/50"
@@ -153,9 +160,6 @@ function LeaderboardTable({ title, items, scoreKey, currentEmail }) {
                                 (You)
                               </span>
                             )}
-                          </span>
-                          <span className="text-xs text-[#6b2020]/60">
-                            {row.email}
                           </span>
                         </div>
                       </div>

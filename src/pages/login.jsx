@@ -7,6 +7,8 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
 } from "firebase/auth";
+import { db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 import Page from "../components/ui/Page";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -20,6 +22,16 @@ export default function Login() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
+
+  async function ensureUsernameProfile(user) {
+    // If user doc is missing username, send them to the username page.
+    if (!user?.email) return;
+    const snap = await getDoc(doc(db, "users", user.email));
+    const hasUsername = snap.exists() ? !!snap.data()?.username : false;
+    if (!hasUsername) {
+      window.location.assign("/choose-username");
+    }
+  }
 
   const handleEmailAuth = async () => {
     setError("");
@@ -42,7 +54,8 @@ export default function Login() {
       }
     } else {
       try {
-        await signInWithEmailAndPassword(auth, email, password);
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        await ensureUsernameProfile(cred.user);
       } catch (err) {
         setError(err.message);
       }
@@ -73,7 +86,8 @@ export default function Login() {
   const handleGoogle = async () => {
     try {
       setBusy(true);
-      await signInWithPopup(auth, googleProvider);
+      const cred = await signInWithPopup(auth, googleProvider);
+      await ensureUsernameProfile(cred.user);
     } catch (err) {
       setError(err.message);
     } finally {

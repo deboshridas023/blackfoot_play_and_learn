@@ -108,10 +108,14 @@ export default function Quiz() {
       const snap = await getDoc(userDocRef);
 
       if (!snap.exists()) {
-        await setDoc(userDocRef, {
-          quizScore: points,
-          createdAt: new Date(),
-        });
+        await setDoc(
+          userDocRef,
+          {
+            quizScore: points,
+            createdAt: new Date(),
+          },
+          { merge: true }
+        );
       } else {
         await updateDoc(userDocRef, {
           quizScore: increment(points),

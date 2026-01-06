@@ -55,9 +55,8 @@ export default function Button({
       {...props}
     >
       {LeftIcon ? <LeftIcon className="h-4 w-4" aria-hidden="true" /> : null}
-      <span>{children}</span>
+      <span className="inline-flex items-center gap-2">{children}</span>
       {RightIcon ? <RightIcon className="h-4 w-4" aria-hidden="true" /> : null}
     </Comp>
   );
 }
-

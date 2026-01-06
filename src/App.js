@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { auth } from "./firebase";
+import useEnsureUsername from "./hooks/useEnsureUsername";
 import Login from "./pages/login";
 import VerifyEmail from "./pages/verifyEmail";
 import Home from "./pages/home";
+import ChooseUsername from "./pages/chooseUsername";
 import Flashcardthemes from "./games/flashcardthemes";
 import Flashcards from "./games/flashcards";
 import FillInTheGap from "./games/fillinthegap";
@@ -36,19 +38,32 @@ function App() {
   // once logged in show app with routes
   return (
     <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/games/flashcardthemes" element={<Flashcardthemes />} />
-        <Route path="/games/flashcards/:theme" element={<Flashcards />} />
-        <Route path="/games/fillinthegap" element={<FillInTheGap />} />
-        <Route path="/games/fillinthegapthemes" element={<FillInTheGapThemes />} />
-        <Route path="/games/shortstorieslist" element={<ShortStoriesList />} />
-        <Route path="/games/shortstoriesdetails/:id" element={<ShortStoryDetail />} />
-        <Route path="/games/quiz" element={<Quiz />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/leaderboard" element={<Leaderboard />} />
-      </Routes>
+      <AppRoutes />
     </BrowserRouter>
+  );
+}
+
+function AppRoutes() {
+  // Hook must be inside BrowserRouter.
+  const { checking } = useEnsureUsername();
+
+  // Small gate to avoid flashing routes before redirect check.
+  if (checking) return null;
+
+  return (
+    <Routes>
+      <Route path="/choose-username" element={<ChooseUsername />} />
+      <Route path="/" element={<Home />} />
+      <Route path="/games/flashcardthemes" element={<Flashcardthemes />} />
+      <Route path="/games/flashcards/:theme" element={<Flashcards />} />
+      <Route path="/games/fillinthegap" element={<FillInTheGap />} />
+      <Route path="/games/fillinthegapthemes" element={<FillInTheGapThemes />} />
+      <Route path="/games/shortstorieslist" element={<ShortStoriesList />} />
+      <Route path="/games/shortstoriesdetails/:id" element={<ShortStoryDetail />} />
+      <Route path="/games/quiz" element={<Quiz />} />
+      <Route path="/history" element={<History />} />
+      <Route path="/leaderboard" element={<Leaderboard />} />
+    </Routes>
   );
 }
 

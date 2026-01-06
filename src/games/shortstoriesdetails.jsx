@@ -118,10 +118,14 @@ export default function ShortStoryDetail() {
 
       if (!snap.exists()) {
         // first time: create document with initial score
-        await setDoc(userDocRef, {
-          shortStoriesScore: 1,
-          createdAt: new Date(),
-        });
+        await setDoc(
+          userDocRef,
+          {
+            shortStoriesScore: 1,
+            createdAt: new Date(),
+          },
+          { merge: true }
+        );
       } else {
         // increment existing score
         await updateDoc(userDocRef, {

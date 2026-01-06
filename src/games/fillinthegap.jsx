@@ -81,10 +81,14 @@ export default function FillInTheGap() {
       const snap = await getDoc(userDocRef);
 
       if (!snap.exists()) {
-        await setDoc(userDocRef, {
-          builderScore: points,
-          createdAt: new Date(),
-        });
+        await setDoc(
+          userDocRef,
+          {
+            builderScore: points,
+            createdAt: new Date(),
+          },
+          { merge: true }
+        );
       } else {
         await updateDoc(userDocRef, {
           builderScore: increment(points),
