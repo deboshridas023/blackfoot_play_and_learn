@@ -1,6 +1,6 @@
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
-import { useNavigate, Link } from "react-router-dom"; 
+import { useNavigate, Link } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Page from "../components/ui/Page";
 import Card from "../components/ui/Card";
@@ -17,6 +17,7 @@ const THEMES = [
 
 export default function FlashcardThemes() {
   const navigate = useNavigate();
+  
   const handleexit = async () => {
     navigate("/"); 
   };
@@ -36,6 +37,7 @@ export default function FlashcardThemes() {
             Practice high-frequency vocabulary with audio and images.
           </p>
         </div>
+        {/* Dialect buttons will be shown per-theme inside each card */}
 
         <TopActions
           right={
@@ -53,33 +55,63 @@ export default function FlashcardThemes() {
           {THEMES.map((t) => (
             <Card
               key={t.slug}
-              as={Link}
-              to={`/games/flashcards/${t.slug}`}
-              className="group p-4 sm:p-5 border border-rose-200/70 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-900/5 transition"
+              className="relative p-4 sm:p-5 border border-rose-200/70 transition"
             >
-              <div className="flex items-center gap-4">
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-rose-50 to-white ring-1 ring-rose-300/40">
-                  <Layers3 className="h-6 w-6 text-[var(--brand)]" aria-hidden="true" />
-                </div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-rose-50 to-white ring-1 ring-rose-300/40">
+                    <Layers3 className="h-6 w-6 text-[var(--brand)]" aria-hidden="true" />
+                  </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <h2 className="text-base sm:text-lg font-semibold text-[var(--text)]">
-                        {t.title}
-                      </h2>
-                      <p className="mt-1 text-sm text-[var(--muted)]">
-                        {t.tagline}
-                      </p>
-                    </div>
-
-                    <ArrowRight
-                      className="h-5 w-5 text-[var(--muted)] opacity-0 group-hover:opacity-100 transition"
-                      aria-hidden="true"
-                    />
+                  <div className="min-w-0">
+                    <h2 className="text-base sm:text-lg font-semibold text-[var(--text)]">
+                      {t.title}
+                    </h2>
+                    <p className="mt-1 text-sm text-[var(--muted)]">
+                      {t.tagline}
+                    </p>
                   </div>
                 </div>
+
+                {/* Right side: dialect buttons (rectangular visible buttons) */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={() => {
+                      navigate({ pathname: `/games/flashcards/${t.slug}`, search: `?dialect=Kainai` });
+                    }}
+                    variant={"secondary"}
+                    className={"px-3 py-1 text-sm"}
+                  >
+                    Kainai
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      if (t.slug === "days") {
+                        navigate({ pathname: `/games/flashcards/${t.slug}`, search: `?dialect=Piikani` });
+                      }
+                    }}
+                    variant={"secondary"}
+                    className={t.slug === "days" ? "px-3 py-1 text-sm" : "px-3 py-1 text-sm opacity-40 cursor-not-allowed"}
+                    disabled={t.slug !== "days"}
+                  >
+                    Piikani
+                  </Button>
+
+                  <Button
+                    onClick={() => {
+                      // Siksika disabled for now
+                    }}
+                    variant={"secondary"}
+                    className={"px-3 py-1 text-sm opacity-40 cursor-not-allowed"}
+                    disabled
+                  >
+                    Siksika
+                  </Button>
+                </div>
               </div>
+            
+            {/* Tile is non-clickable; only the dialect buttons are interactive */}
             </Card>
           ))}
         </div>

@@ -1,6 +1,6 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import { ref, getDownloadURL } from "firebase/storage";
 
 import { db, storage } from "../firebase";
@@ -14,6 +14,7 @@ import { ChevronLeft, Home, RotateCcw, Volume2 } from "lucide-react";
 export default function Flashcards() {
   const { theme } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [index, setIndex] = useState(0);
   const [flipped, setFlipped] = useState(false);
@@ -34,7 +35,18 @@ export default function Flashcards() {
       try {
         setLoading(true);
         const colRef = collection(db, `flashcards/dnvSyiAbhumktOGFUy3s/${theme}`);
-        const snap = await getDocs(colRef);
+        // Read optional dialect filter from query string
+        const params = new URLSearchParams(location.search);
+        const dialect = params.get("dialect");
+
+        let snap;
+        if (dialect) {
+          // query by dialect field
+          const q = query(colRef, where("dialect", "==", dialect));
+          snap = await getDocs(q);
+        } else {
+          snap = await getDocs(colRef);
+        }
         const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
         if (cancelled) return;
 
@@ -51,7 +63,7 @@ export default function Flashcards() {
 
     loadCards();
     return () => (cancelled = true);
-  }, [theme]);
+  }, [theme, location.search]);
 
   // Prevent layout shift / horizontal scrollbars during 3D flip animation
   useEffect(() => {
@@ -180,9 +192,10 @@ export default function Flashcards() {
 
   if (completed) {
     return (
-      <Page className="flex items-center" containerClassName="py-16" variant="paper">
+      <Page containerClassName="pt-6 pb-12" variant="paper">
         <Navbar />
-        <div className="w-full max-w-xl mx-auto pt-10">
+
+        <div className="w-full max-w-4xl mx-auto pt-6">
           <Card className="p-6 sm:p-8 text-center">
             <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
               Flashcards
