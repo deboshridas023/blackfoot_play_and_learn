@@ -303,9 +303,12 @@ export default function Flashcards() {
                 className="absolute w-full h-full p-6 backface-hidden flex flex-col items-center justify-center gap-6 cursor-pointer border border-rose-200/70"
               >
                 {selectedDialect && (
-                  <div className="absolute top-3 right-3 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
-                    <span className="text-[var(--muted)]">Dialect</span>
-                    <span className="font-semibold">{selectedDialect}</span>
+                  // badge placed in normal flow (not absolute) so it doesn't overlap content when card flips
+                  <div className="w-full flex justify-end">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
+                      <span className="text-[var(--muted)]">Dialect</span>
+                      <span className="font-semibold">{selectedDialect}</span>
+                    </div>
                   </div>
                 )}
                 <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)] text-center">
@@ -317,9 +320,11 @@ export default function Flashcards() {
               {/* BACK */}
               <Card className="absolute w-full h-full p-6 backface-hidden flex flex-col justify-between rotate-y-180 border border-rose-200/70">
                 {selectedDialect && (
-                  <div className="absolute top-3 right-3 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
-                    <span className="text-[var(--muted)]">Dialect</span>
-                    <span className="font-semibold">{selectedDialect}</span>
+                  <div className="w-full flex justify-end">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
+                      <span className="text-[var(--muted)]">Dialect</span>
+                      <span className="font-semibold">{selectedDialect}</span>
+                    </div>
                   </div>
                 )}
                 <div className="text-xl sm:text-2xl font-semibold text-center mt-2 text-[var(--text)]">

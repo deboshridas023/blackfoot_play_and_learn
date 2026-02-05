@@ -508,9 +508,9 @@ export default function FillInTheGap() {
                 </div>
 
                 {selectedDialect && (
-                  <div className="ml-3 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
-                    <span className="text-[var(--muted)]">Dialect</span>
-                    <span className="font-semibold">{selectedDialect}</span>
+                  <div className="ml-3 inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-2 py-0.5 text-sm text-[var(--text)]">
+                    <span className="text-[var(--muted)] text-xs">Dialect</span>
+                    <span className="font-semibold text-sm">{selectedDialect}</span>
                   </div>
                 )}
               </div>
