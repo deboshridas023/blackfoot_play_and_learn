@@ -290,7 +290,17 @@ export default function Flashcards() {
           </div>
         </div>
 
-        <div className="mt-8 flex items-center justify-center pb-12">
+        {/* Dialect badge (page-level, above the card) */}
+        <div className="mt-6 flex justify-center">
+          {selectedDialect && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
+              <span className="text-[var(--muted)]">Dialect</span>
+              <span className="font-semibold">{selectedDialect}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 flex items-center justify-center pb-12">
           <div className="relative w-[320px] h-[460px] sm:w-[380px] sm:h-[500px] perspective overflow-hidden">
             <div
               className={`relative w-full h-full duration-500 transform-style-preserve-3d ${
@@ -300,74 +310,84 @@ export default function Flashcards() {
               {/* FRONT */}
               <Card
                 onClick={handleFlip}
-                className="absolute w-full h-full p-6 backface-hidden flex flex-col items-center justify-center gap-6 cursor-pointer border border-rose-200/70"
+                className="absolute w-full h-full p-6 backface-hidden cursor-pointer border border-rose-200/70"
               >
-                {selectedDialect && (
-                  // badge placed in normal flow (not absolute) so it doesn't overlap content when card flips
-                  <div className="w-full flex justify-end">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
-                      <span className="text-[var(--muted)]">Dialect</span>
-                      <span className="font-semibold">{selectedDialect}</span>
-                    </div>
+                <div className="flex flex-col w-full h-full">
+                  {/* reserved header area for badge so content stays centered and never overlaps */}
+                  <div className="h-6 flex items-center justify-end">
+                    {selectedDialect && (
+                      <div className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-white/40 px-2 py-0.5 text-[11px] text-[var(--text)]">
+                        <span className="text-[var(--muted)]">Dialect</span>
+                        <span className="font-semibold text-[13px]">{selectedDialect}</span>
+                      </div>
+                    )}
                   </div>
-                )}
-                <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)] text-center">
-                  {current?.english}
-                </p>
-                <p className="text-sm text-[var(--muted)]">Tap to flip</p>
+
+                  <div className="flex-1 flex flex-col items-center justify-center gap-6">
+                    <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)] text-center">
+                      {current?.english}
+                    </p>
+                    <p className="text-sm text-[var(--muted)]">Tap to flip</p>
+                  </div>
+                </div>
               </Card>
 
               {/* BACK */}
-              <Card className="absolute w-full h-full p-6 backface-hidden flex flex-col justify-between rotate-y-180 border border-rose-200/70">
-                {selectedDialect && (
-                  <div className="w-full flex justify-end">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
-                      <span className="text-[var(--muted)]">Dialect</span>
-                      <span className="font-semibold">{selectedDialect}</span>
+              <Card className="absolute w-full h-full p-6 backface-hidden rotate-y-180 border border-rose-200/70">
+                <div className="flex flex-col w-full h-full">
+                  <div className="h-6 flex items-center justify-end">
+                    {selectedDialect && (
+                      <div className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-white/40 px-2 py-0.5 text-[11px] text-[var(--text)]">
+                        <span className="text-[var(--muted)]">Dialect</span>
+                        <span className="font-semibold text-[13px]">{selectedDialect}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                    <div className="text-xl sm:text-2xl font-semibold text-center text-[var(--text)]">
+                      {current?.blackfoot}
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center gap-2 text-[var(--text)]">
+                      <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
+                        Audio
+                      </div>
+                      <div className="text-sm text-[var(--muted)]">
+                        {current?.audio || "No audio file"}
+                      </div>
+                      {current?.audio && (
+                        <Button onClick={playAudio} leftIcon={Volume2}>
+                          Play audio
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="flex justify-center mt-0">
+                      {image ? (
+                        <img
+                          src={image}
+                          alt={current?.english}
+                          className="w-44 h-44 object-cover rounded-xl border border-[var(--border)]"
+                        />
+                      ) : (
+                        <div className="w-44 h-44 bg-white/50 rounded-xl border border-[var(--border)] flex items-center justify-center text-[var(--muted)] text-sm">
+                          No image
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
-                <div className="text-xl sm:text-2xl font-semibold text-center mt-2 text-[var(--text)]">
-                  {current?.blackfoot}
-                </div>
 
-                <div className="flex flex-col items-center justify-center gap-2 text-[var(--text)]">
-                  <div className="text-xs uppercase tracking-[0.18em] text-[var(--muted)]">
-                    Audio
-                  </div>
-                  <div className="text-sm text-[var(--muted)]">
-                    {current?.audio || "No audio file"}
-                  </div>
-                  {current?.audio && (
-                    <Button onClick={playAudio} leftIcon={Volume2}>
-                      Play audio
+                  <div className="flex justify-between gap-3 mt-4">
+                    <Button
+                      onClick={handlePrev}
+                      variant="secondary"
+                      disabled={index === 0}
+                    >
+                      Prev
                     </Button>
-                  )}
-                </div>
-
-                <div className="flex justify-center mt-3">
-                  {image ? (
-                    <img
-                      src={image}
-                      alt={current?.english}
-                      className="w-44 h-44 object-cover rounded-xl border border-[var(--border)]"
-                    />
-                  ) : (
-                    <div className="w-44 h-44 bg-white/50 rounded-xl border border-[var(--border)] flex items-center justify-center text-[var(--muted)] text-sm">
-                      No image
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-between gap-3 mt-4">
-                  <Button
-                    onClick={handlePrev}
-                    variant="secondary"
-                    disabled={index === 0}
-                  >
-                    Prev
-                  </Button>
-                  <Button onClick={handleNext}>Next</Button>
+                    <Button onClick={handleNext}>Next</Button>
+                  </div>
                 </div>
               </Card>
             </div>
