@@ -9,6 +9,8 @@ import { storage, db, auth } from "../firebase";
 import { ref, getDownloadURL } from "firebase/storage";
 import {
   collection,
+  query,
+  where,
   doc,
   getDoc,
   getDocs,
@@ -53,6 +55,10 @@ export default function FillInTheGap() {
   const themeId = useMemo(() => {
     const params = new URLSearchParams(location.search);
     return params.get("themeId");
+  }, [location.search]);
+  const selectedDialect = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    return params.get("dialect") || null;
   }, [location.search]);
   const [levelIndex, setLevelIndex] = useState(0);
   const [inputs, setInputs] = useState([""]); // one input per blank
@@ -148,11 +154,51 @@ export default function FillInTheGap() {
 
       try {
         setLevelsLoading(true);
+        // debug
+        // eslint-disable-next-line no-console
+        console.debug('[fillinthegap] loadThemeLevels start', { themeId, selectedDialect });
 
         // Firestore structure from your screenshot:
         // blackfoot builder/{themeId}/sentences/{sentenceId}
         const colRef = collection(db, "blackfoot builder", themeId, "sentences");
-        const snap = await getDocs(colRef);
+        // If a dialect is selected, prefer using the theme's top-level `dialect` field
+        // (your theme documents include `dialect`), otherwise fall back to querying
+        // sentences by dialect if they have that field.
+        let snap;
+        if (selectedDialect) {
+          try {
+            const themeDocRef = doc(db, "blackfoot builder", themeId);
+            const themeSnap = await getDoc(themeDocRef);
+            const themeData = themeSnap.exists() ? themeSnap.data() : null;
+            // debug
+            // eslint-disable-next-line no-console
+            console.debug('[fillinthegap] themeData for', themeId, themeData);
+
+            if (themeData && themeData.dialect && String(themeData.dialect).toLowerCase() === String(selectedDialect).toLowerCase()) {
+              // Theme itself is for the selected dialect: load all sentences for this theme
+              // debug
+              // eslint-disable-next-line no-console
+              console.debug('[fillinthegap] theme-level dialect matches; loading all sentences for theme', themeId);
+              snap = await getDocs(colRef);
+              // eslint-disable-next-line no-console
+              console.debug('[fillinthegap] loaded sentences count (theme-level):', snap.size);
+            } else {
+              // Fallback: try to query sentences by dialect (in case your sentence docs include dialect)
+              // debug
+              // eslint-disable-next-line no-console
+              console.debug('[fillinthegap] theme-level dialect not match; querying sentences by dialect', selectedDialect);
+              const q = query(colRef, where("dialect", "==", selectedDialect));
+              snap = await getDocs(q);
+              // eslint-disable-next-line no-console
+              console.debug('[fillinthegap] loaded sentences count (query-by-dialect):', snap.size);
+            }
+          } catch (err) {
+            console.error("Error checking theme dialect:", err);
+            snap = await getDocs(colRef);
+          }
+        } else {
+          snap = await getDocs(colRef);
+        }
 
         const data = snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
@@ -191,7 +237,7 @@ export default function FillInTheGap() {
     return () => {
       cancelled = true;
     };
-  }, [themeId]);
+  }, [themeId, selectedDialect]);
 
   // Stop any playing audio when the level changes
   useEffect(() => {
