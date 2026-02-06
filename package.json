@@ -18,7 +18,14 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "test:ci": "react-scripts test --watchAll=false --runInBand --verbose",
+    "test:unit": "react-scripts test --watchAll=false --runInBand --verbose --testPathPattern=src/__tests__",
+    "test:integration": "react-scripts test --watchAll=false --runInBand --verbose --testPathPattern=src/__integration__",
+    "test:list": "react-scripts test --watchAll=false --listTests",
+    "test:verbose": "react-scripts test --watchAll=false --verbose",
+    "test:ci": "react-scripts test --watchAll=false --runInBand --verbose",
+    "test:coverage": "react-scripts test --watchAll=false --coverage",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
