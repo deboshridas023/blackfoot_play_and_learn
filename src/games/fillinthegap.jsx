@@ -18,7 +18,7 @@ import {
   updateDoc,
   increment,
 } from "firebase/firestore";
-import { ChevronLeft, Home, RotateCcw, Volume2, Eraser, SkipForward } from "lucide-react";
+import { ChevronLeft, Home, RotateCcw, Volume2, Eraser, SkipForward, Eye } from "lucide-react";
 
 function normalize(s) {
   return (s || "")
@@ -71,6 +71,7 @@ export default function FillInTheGap() {
   const [completed, setCompleted] = useState(false);
   const [audioBusy, setAudioBusy] = useState(false);
   const audioRef = useRef(null);
+  const [showAnswer, setShowAnswer] = useState(false);
 
   // Session storage is scoped per themeId.
   const sessionKey = useMemo(
@@ -143,6 +144,7 @@ export default function FillInTheGap() {
     setFeedback(null);
     setCompleted(false);
     setLevelIndex(0);
+    setShowAnswer(false);
     // score reset happens if they restart; keep score per theme session via session storage.
   }, [themeId]);
 
@@ -224,6 +226,7 @@ export default function FillInTheGap() {
           setInputs([""]);
           setFeedback(null);
           setCompleted(false);
+          setShowAnswer(false);
         }
       } catch (err) {
         console.error("Firestore error (blackfoot builder sentences):", err);
@@ -321,6 +324,7 @@ export default function FillInTheGap() {
           setLevelIndex((i) => i + 1);
           setInputs([""]);
           setFeedback(null);
+          setShowAnswer(false);
         } else {
           setCompleted(true);
         }
@@ -335,6 +339,7 @@ export default function FillInTheGap() {
       setLevelIndex((i) => i + 1);
       setInputs([""]);
       setFeedback(null);
+      setShowAnswer(false);
     } else {
       setCompleted(true);
     }
@@ -346,6 +351,7 @@ export default function FillInTheGap() {
     setInputs([""]);
     setFeedback(null);
     setCompleted(false);
+    setShowAnswer(false);
     sessionStorage.removeItem(sessionKey);
   }
 
@@ -593,14 +599,33 @@ export default function FillInTheGap() {
                   )}
 
                   <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                    <Button type="submit">Check answer</Button>
+                    <Button type="submit" disabled={showAnswer}>Check answer</Button>
                     <Button
                       type="button"
                       onClick={() => setInputs((prev) => prev.map(() => ""))}
                       variant="secondary"
                       leftIcon={Eraser}
+                      disabled={showAnswer}
                     >
                       Clear
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        // reveal the correct answers and prevent scoring
+                        const required = blanksCount > 0 ? blanksCount : 1;
+                        const toFill = expectedAnswers.slice(0, required);
+                        // ensure inputs length
+                        const filled = Array.from({ length: Math.max(required, 1) }, (_, i) => toFill[i] ?? "");
+                        setInputs(filled);
+                        setShowAnswer(true);
+                        setFeedback(null);
+                      }}
+                      variant="secondary"
+                      leftIcon={Eye}
+                      disabled={showAnswer}
+                    >
+                      Show answer
                     </Button>
                     <Button
                       type="button"
