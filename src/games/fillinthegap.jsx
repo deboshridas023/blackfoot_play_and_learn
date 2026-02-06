@@ -496,13 +496,13 @@ export default function FillInTheGap() {
           <div className="w-full max-w-5xl">
             <Card className="p-6 sm:p-7 border border-rose-200/70">
               {/* Header: Score + Progress */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="text-sm text-[var(--muted)]">
                   Level <span className="font-medium text-[var(--text)]">{levelIndex + 1}</span> of{" "}
                   <span className="font-medium text-[var(--text)]">{levels.length}</span>
                 </div>
 
-                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)]">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white/70 px-3 py-1 text-sm text-[var(--text)] sm:absolute sm:left-1/2 sm:transform sm:-translate-x-1/2 sm:z-10">
                   <span className="text-[var(--muted)]">Score</span>
                   <span className="font-semibold">{score}</span>
                 </div>
