@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/blackfoot_play_and_learn/static/css/main.330286ca.css",
+    "main.js": "/blackfoot_play_and_learn/static/js/main.e28bb105.js",
+    "static/js/453.aa114dfd.chunk.js": "/blackfoot_play_and_learn/static/js/453.aa114dfd.chunk.js",
+    "index.html": "/blackfoot_play_and_learn/index.html",
+    "main.330286ca.css.map": "/blackfoot_play_and_learn/static/css/main.330286ca.css.map",
+    "main.e28bb105.js.map": "/blackfoot_play_and_learn/static/js/main.e28bb105.js.map",
+    "453.aa114dfd.chunk.js.map": "/blackfoot_play_and_learn/static/js/453.aa114dfd.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.330286ca.css",
+    "static/js/main.e28bb105.js"
+  ]
+}
