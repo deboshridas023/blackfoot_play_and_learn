@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/blackfoot_play_and_learn/static/css/main.330286ca.css",
-    "main.js": "/blackfoot_play_and_learn/static/js/main.b7e0c4a6.js",
+    "main.css": "/blackfoot_play_and_learn/static/css/main.d83f9bba.css",
+    "main.js": "/blackfoot_play_and_learn/static/js/main.64b6a3cf.js",
     "static/js/453.aa114dfd.chunk.js": "/blackfoot_play_and_learn/static/js/453.aa114dfd.chunk.js",
     "index.html": "/blackfoot_play_and_learn/index.html",
-    "main.330286ca.css.map": "/blackfoot_play_and_learn/static/css/main.330286ca.css.map",
-    "main.b7e0c4a6.js.map": "/blackfoot_play_and_learn/static/js/main.b7e0c4a6.js.map",
+    "main.d83f9bba.css.map": "/blackfoot_play_and_learn/static/css/main.d83f9bba.css.map",
+    "main.64b6a3cf.js.map": "/blackfoot_play_and_learn/static/js/main.64b6a3cf.js.map",
     "453.aa114dfd.chunk.js.map": "/blackfoot_play_and_learn/static/js/453.aa114dfd.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.330286ca.css",
-    "static/js/main.b7e0c4a6.js"
+    "static/css/main.d83f9bba.css",
+    "static/js/main.64b6a3cf.js"
   ]
 }
