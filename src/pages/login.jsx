@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { auth, googleProvider } from "../firebase";
 import {
   signInWithEmailAndPassword,
@@ -15,6 +16,7 @@ import Button from "../components/ui/Button";
 import { LogIn, UserPlus } from "lucide-react";
 
 export default function Login() {
+  const navigate = useNavigate();
   const [isSignup, setIsSignup] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +31,7 @@ export default function Login() {
     const snap = await getDoc(doc(db, "users", user.email));
     const hasUsername = snap.exists() ? !!snap.data()?.username : false;
     if (!hasUsername) {
-      window.location.assign("/choose-username");
+      navigate("/choose-username", { replace: true });
     }
   }
 

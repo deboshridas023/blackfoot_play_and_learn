@@ -80,7 +80,7 @@ export default function FlashcardThemes() {
                       navigate({ pathname: `/games/flashcards/${t.slug}`, search: `?dialect=Kainai` });
                     }}
                     variant={"secondary"}
-                    className={"px-3 py-1 text-sm"}
+                    className={"px-3 py-1 text-sm hover:!bg-[var(--brand-2)] hover:!text-white hover:!border-[var(--brand-2)]"}
                   >
                     Kainai
                   </Button>
@@ -92,7 +92,11 @@ export default function FlashcardThemes() {
                       }
                     }}
                     variant={"secondary"}
-                    className={t.slug === "days" ? "px-3 py-1 text-sm" : "px-3 py-1 text-sm opacity-40 cursor-not-allowed"}
+                    className={
+                      t.slug === "days"
+                        ? "px-3 py-1 text-sm hover:!bg-[var(--brand-2)] hover:!text-white hover:!border-[var(--brand-2)]"
+                        : "px-3 py-1 text-sm opacity-40 cursor-not-allowed"
+                    }
                     disabled={t.slug !== "days"}
                   >
                     Piikani

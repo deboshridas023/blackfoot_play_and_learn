@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { auth } from "./firebase";
 import useEnsureUsername from "./hooks/useEnsureUsername";
@@ -18,6 +18,14 @@ import FillInTheGapThemes from "./games/fillinthegapThemes"
 
 
 function App() {
+  return (
+    <HashRouter>
+      <Main />
+    </HashRouter>
+  );
+}
+
+function Main() {
   const [user, setUser] = useState(undefined);
 
   useEffect(() => {
@@ -35,16 +43,11 @@ function App() {
   const isPasswordUser = user.providerData?.some((p) => p.providerId === "password");
   if (isPasswordUser && !user.emailVerified) return <VerifyEmail />;
 
-  // once logged in show app with routes
-  return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
-  );
+  return <AuthenticatedApp />;
 }
 
-function AppRoutes() {
-  // Hook must be inside BrowserRouter.
+function AuthenticatedApp() {
+  // Hook must be inside HashRouter.
   const { checking } = useEnsureUsername();
 
   // Small gate to avoid flashing routes before redirect check.
