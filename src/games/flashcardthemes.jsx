@@ -1,6 +1,8 @@
 import { signOut } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { collection, getDocs, query, where, limit } from "firebase/firestore";
 import Navbar from "../components/navbar";
 import Page from "../components/ui/Page";
 import Card from "../components/ui/Card";
@@ -15,9 +17,52 @@ const THEMES = [
   { slug: "clothing", title: "Clothing", tagline: "Made to be worn" }
 ];
 
+const DIALECTS = ["Kainai", "Piikani", "Siksika"];
+
 export default function FlashcardThemes() {
   const navigate = useNavigate();
-  
+  const [availability, setAvailability] = useState({});
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkAvailability() {
+      try {
+        const results = {};
+        const promises = [];
+
+        THEMES.forEach((theme) => {
+          results[theme.slug] = {};
+          DIALECTS.forEach((dialect) => {
+            const colRef = collection(db, `flashcards/dnvSyiAbhumktOGFUy3s/${theme.slug}`);
+            const q = query(colRef, where("dialect", "==", dialect), limit(1));
+            promises.push(
+              getDocs(q).then((snap) => {
+                if (!cancelled) {
+                  results[theme.slug][dialect] = !snap.empty;
+                }
+              })
+            );
+          });
+        });
+
+        await Promise.all(promises);
+        if (!cancelled) {
+          setAvailability(results);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error("Error checking dialect availability:", err);
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    checkAvailability();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleexit = async () => {
     navigate("/"); 
   };
@@ -75,43 +120,31 @@ export default function FlashcardThemes() {
 
                 {/* Right side: dialect buttons (rectangular visible buttons) */}
                 <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() => {
-                      navigate({ pathname: `/games/flashcards/${t.slug}`, search: `?dialect=Kainai` });
-                    }}
-                    variant={"secondary"}
-                    className={"px-3 py-1 text-sm hover:!bg-[var(--brand-2)] hover:!text-white hover:!border-[var(--brand-2)]"}
-                  >
-                    Kainai
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      if (t.slug === "days") {
-                        navigate({ pathname: `/games/flashcards/${t.slug}`, search: `?dialect=Piikani` });
-                      }
-                    }}
-                    variant={"secondary"}
-                    className={
-                      t.slug === "days"
-                        ? "px-3 py-1 text-sm hover:!bg-[var(--brand-2)] hover:!text-white hover:!border-[var(--brand-2)]"
-                        : "px-3 py-1 text-sm opacity-40 cursor-not-allowed"
-                    }
-                    disabled={t.slug !== "days"}
-                  >
-                    Piikani
-                  </Button>
-
-                  <Button
-                    onClick={() => {
-                      // Siksika disabled for now
-                    }}
-                    variant={"secondary"}
-                    className={"px-3 py-1 text-sm opacity-40 cursor-not-allowed"}
-                    disabled
-                  >
-                    Siksika
-                  </Button>
+                  {DIALECTS.map((d) => {
+                    const isAvailable = availability[t.slug]?.[d];
+                    return (
+                      <Button
+                        key={d}
+                        onClick={() => {
+                          if (isAvailable) {
+                            navigate({
+                              pathname: `/games/flashcards/${t.slug}`,
+                              search: `?dialect=${d}`,
+                            });
+                          }
+                        }}
+                        variant={"secondary"}
+                        className={
+                          isAvailable
+                            ? "px-3 py-1 text-sm hover:!bg-[var(--brand-2)] hover:!text-white hover:!border-[var(--brand-2)]"
+                            : "px-3 py-1 text-sm opacity-40 cursor-not-allowed"
+                        }
+                        disabled={!isAvailable || loading}
+                      >
+                        {d}
+                      </Button>
+                    );
+                  })}
                 </div>
               </div>
             

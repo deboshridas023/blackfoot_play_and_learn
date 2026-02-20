@@ -313,16 +313,6 @@ export default function Flashcards() {
                 className="absolute w-full h-full p-6 backface-hidden cursor-pointer border border-rose-200/70"
               >
                 <div className="flex flex-col w-full h-full">
-                  {/* reserved header area for badge so content stays centered and never overlaps */}
-                  <div className="h-6 flex items-center justify-end">
-                    {selectedDialect && (
-                      <div className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-white/40 px-2 py-0.5 text-[11px] text-[var(--text)]">
-                        <span className="text-[var(--muted)]">Dialect</span>
-                        <span className="font-semibold text-[13px]">{selectedDialect}</span>
-                      </div>
-                    )}
-                  </div>
-
                   <div className="flex-1 flex flex-col items-center justify-center gap-6">
                     <p className="text-2xl sm:text-3xl font-semibold tracking-tight text-[var(--text)] text-center">
                       {current?.english}
@@ -335,15 +325,6 @@ export default function Flashcards() {
               {/* BACK */}
               <Card className="absolute w-full h-full p-6 backface-hidden rotate-y-180 border border-rose-200/70">
                 <div className="flex flex-col w-full h-full">
-                  <div className="h-6 flex items-center justify-end">
-                    {selectedDialect && (
-                      <div className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-white/40 px-2 py-0.5 text-[11px] text-[var(--text)]">
-                        <span className="text-[var(--muted)]">Dialect</span>
-                        <span className="font-semibold text-[13px]">{selectedDialect}</span>
-                      </div>
-                    )}
-                  </div>
-
                   <div className="flex-1 flex flex-col items-center justify-center gap-4">
                     <div className="text-xl sm:text-2xl font-semibold text-center text-[var(--text)]">
                       {current?.blackfoot}
