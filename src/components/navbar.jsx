@@ -35,7 +35,12 @@ function providerIds(user) {
 export default function Navbar() {
   const navigate = useNavigate();
   const [user, setUser] = useState(auth.currentUser);
-  const [username, setUsername] = useState(null);
+  const [username, setUsername] = useState(() => {
+    if (auth.currentUser?.email) {
+      return localStorage.getItem(`bf_username_${auth.currentUser.email}`) || undefined;
+    }
+    return undefined;
+  });
 
   const [profileOpen, setProfileOpen] = useState(false);
   const profileBtnRef = useRef(null);
@@ -102,11 +107,25 @@ export default function Navbar() {
         if (!cancelled) setUsername(null);
         return;
       }
+      
+      const cached = localStorage.getItem(`bf_username_${email}`);
+      if (cached && !cancelled) {
+        setUsername(cached);
+      }
+
       try {
         const snap = await getDoc(doc(db, "users", email));
-        if (!cancelled) setUsername(snap.exists() ? snap.data()?.username || null : null);
+        if (!cancelled) {
+          const fetchedName = snap.exists() ? snap.data()?.username || null : null;
+          setUsername(fetchedName);
+          if (fetchedName) {
+            localStorage.setItem(`bf_username_${email}`, fetchedName);
+          } else {
+            localStorage.removeItem(`bf_username_${email}`);
+          }
+        }
       } catch {
-        if (!cancelled) setUsername(null);
+        if (!cancelled && !cached) setUsername(null);
       }
     }
     load();
@@ -190,6 +209,7 @@ export default function Navbar() {
   }, [user]);
 
   const accountLabel = useMemo(() => {
+    if (username === undefined) return "";
     return username || accountEmail;
   }, [accountEmail, username]);
 
@@ -241,6 +261,7 @@ export default function Navbar() {
         newUsername: rawUsername,
       });
       setUsername(updated);
+      localStorage.setItem(`bf_username_${u.email}`, updated);
       setProfileInfo("Username updated.");
     } catch (err) {
       setProfileError(err?.message || "Failed to update username.");
@@ -309,7 +330,9 @@ export default function Navbar() {
       await deleteUserProfileData({ db, email: u.email });
 
       // Delete Auth user
+      const deletedEmail = u.email;
       await deleteUser(u);
+      localStorage.removeItem(`bf_username_${deletedEmail}`);
       navigate("/");
     } catch (err) {
       setProfileError(err?.message || "Re-authentication failed.");

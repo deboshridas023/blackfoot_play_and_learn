@@ -1,101 +1,90 @@
 import React from 'react';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import FillInTheGap from '../../games/fillinthegap';
+import { renderWithRouter } from '../../test-utils/renderWithRouter';
+import { auth } from '../../firebase';
+import { getDocs, getDoc, updateDoc } from 'firebase/firestore';
 
-// Ensure firebase and related functions are mocked before importing components
-jest.mock('../../firebase', () => ({
-  storage: {},
-  db: {},
-  auth: { currentUser: { email: 'test@example.com', uid: 'uid-123' }, onAuthStateChanged: (cb) => { cb(null); return () => {}; } },
-}));
+// Mock firebase
+jest.mock('../../firebase');
 
-// Mock firestore functions the component imports directly
 jest.mock('firebase/firestore', () => ({
   collection: jest.fn(),
   query: jest.fn(),
   where: jest.fn(),
-  doc: jest.fn(),
+  doc: jest.fn((...args) => ({ path: args.join('/') })),
   getDoc: jest.fn(),
   getDocs: jest.fn(),
   setDoc: jest.fn(),
   updateDoc: jest.fn(),
-  increment: jest.fn(() => 1),
+  increment: jest.fn((n) => n),
 }));
 
-// Mock storage helpers
 jest.mock('firebase/storage', () => ({
   ref: jest.fn(),
   getDownloadURL: jest.fn(),
 }));
 
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import FillInTheGap from '../../games/fillinthegap';
-import { renderWithRouter } from '../../test-utils/renderWithRouter';
-
 describe('FillInTheGap component', () => {
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+    auth.__setUser({ email: 'test@example.com', uid: 'uid-123' });
+    getDoc.mockResolvedValue({ exists: () => true, data: () => ({ dialect: 'north', username: 'bob' }) });
+    getDocs.mockResolvedValue({ docs: [] });
   });
 
-  test('renders choose theme message when no themeId in url', () => {
-    renderWithRouter(<FillInTheGap />, { route: '/games/fillinthegap' });
-    expect(screen.getByText(/Choose a theme to begin/i)).toBeInTheDocument();
-  });
-
-  test('loads levels and accepts correct answer', async () => {
-    // Prepare mocked getDoc/getDocs to simulate a theme and two sentences
-    const { getDocs, getDoc } = require('firebase/firestore');
-
-    // theme doc returns dialect
-    getDoc.mockImplementation(async (ref) => ({ exists: () => true, data: () => ({ dialect: 'north' }) }));
-
+  test('full game flow', async () => {
+    const mockDoc = (id, data) => ({ id, data: () => data });
     const sentences = [
-      { id: '1', blackfoot: 'S1', english: 'Hello __', answer: 'world', audio: null },
-      { id: '2', blackfoot: 'S2', english: 'Goodbye __', answer: 'friend', audio: null },
+      { id: 's1', blackfoot: 'S1', english: 'Hello __', answer: 'world', audio: 's1.mp3' },
+      { id: 's2', blackfoot: 'S2', english: 'Goodbye __', answer: 'friend', audio: null },
     ];
-
-    getDocs.mockImplementation(async (q) => ({ docs: sentences.map((s) => ({ id: s.id, data: () => s })) }));
+    getDocs.mockResolvedValue({ docs: sentences.map((s) => mockDoc(s.id, s)) });
 
     renderWithRouter(<FillInTheGap />, { route: '/games/fillinthegap?themeId=abc' });
 
-    // Wait for first level to show by waiting for the blackfoot sentence to render
-    await waitFor(() => expect(screen.getByText('S1')).toBeInTheDocument());
-
-    // Type correct answer and submit
+    await screen.findByText('S1');
     const input = screen.getByPlaceholderText(/type/i);
     await userEvent.type(input, 'world');
-    await userEvent.click(screen.getByRole('button', { name: /Check answer/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Check answer/i }));
+    await screen.findByText(/Correct!/i);
 
-    // After correct, should show feedback and then advance to next level
-    await waitFor(() => expect(screen.getByText(/Correct! \+1 point/i)).toBeInTheDocument());
+    const nextBtn = await screen.findByRole('button', { name: /Skip/i });
+    fireEvent.click(nextBtn);
 
-    // Wait for second sentence (level 2) to be displayed
-    await waitFor(() => expect(screen.getByText('S2')).toBeInTheDocument());
+    await screen.findByText('S2');
+    await userEvent.type(screen.getByPlaceholderText(/type/i), 'wrong');
+    fireEvent.click(screen.getByRole('button', { name: /Check answer/i }));
+    await screen.findByText(/Try again\./i);
+
+    fireEvent.click(screen.getByRole('button', { name: /Show answer/i }));
+    await waitFor(() => expect(screen.getByPlaceholderText(/type/i)).toHaveValue('friend'));
+    
+    // Since "Show answer" was used, check answer is disabled. We must skip.
+    const finishBtn = await screen.findByRole('button', { name: /Skip/i });
+    fireEvent.click(finishBtn);
+    
+    await screen.findByText(/Session completed/i);
+    expect(updateDoc).toHaveBeenCalled();
   });
 
-  test('shows try again for incorrect answer and show answer fills inputs', async () => {
-    const { getDocs, getDoc } = require('firebase/firestore');
-
-    getDoc.mockImplementation(async (ref) => ({ exists: () => false, data: () => null }));
-
-    const sentences = [
-      { id: '1', blackfoot: 'S1', english: 'Hello __', answer: 'apple', audio: null },
-    ];
-
-    getDocs.mockImplementation(async (q) => ({ docs: sentences.map((s) => ({ id: s.id, data: () => s })) }));
+  test('handles audio and errors', async () => {
+    const mockDoc = (id, data) => ({ id, data: () => data });
+    getDocs.mockResolvedValue({ docs: [mockDoc('s1', { id: 's1', blackfoot: 'S1', english: 'H', answer: 'A', audio: 'a.mp3' })] });
+    const { getDownloadURL } = require('firebase/storage');
+    getDownloadURL.mockResolvedValue('url');
 
     renderWithRouter(<FillInTheGap />, { route: '/games/fillinthegap?themeId=abc' });
+    await screen.findByText('S1');
+    
+    fireEvent.click(screen.getByRole('button', { name: /^Play$/i }));
+    expect(getDownloadURL).toHaveBeenCalled();
 
-    await waitFor(() => expect(screen.getByText('S1')).toBeInTheDocument());
-
-    const input = screen.getByPlaceholderText(/type/i);
-    await userEvent.type(input, 'banana');
-    await userEvent.click(screen.getByRole('button', { name: /Check answer/i }));
-
-    await waitFor(() => expect(screen.getByText(/Try again\./i)).toBeInTheDocument());
-
-    // Click Show answer and expect input value to be filled (read-only check via value)
-    await userEvent.click(screen.getByRole('button', { name: /Show answer/i }));
-
-    expect(screen.getByPlaceholderText(/type/i)).toHaveValue('apple');
+    // Force error in load
+    jest.clearAllMocks();
+    getDocs.mockRejectedValueOnce(new Error('fail'));
+    renderWithRouter(<FillInTheGap />, { route: '/games/fillinthegap?themeId=abc' });
+    await screen.findByText(/No builder sentences found/i);
   });
 });

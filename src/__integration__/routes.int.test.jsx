@@ -34,7 +34,7 @@ describe('Integration: Routes render (smoke)', () => {
   beforeEach(() => jest.resetAllMocks());
 
   function renderAt(path) {
-    window.history.pushState({}, 'Test page', path);
+    window.location.hash = path;
     const { auth } = require('../firebase');
     auth.onAuthStateChanged = jest.fn((cb) => { cb({ providerData: [{ providerId: 'password' }], emailVerified: true }); return () => {}; });
     render(<App />);
